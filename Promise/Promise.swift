@@ -14,16 +14,27 @@ import Foundation
 class Promise {
     
     var goal = ""
-    var interval = ""
-    var duration = ""
+    var intervals = [true, true, true, true, true, true, true]
+    var duration = 4
     var reward = ""
+    var reminder = false
+//    var coverPhoto: UIImage()
     
     
     init() {}
     
+    
+//    required init?(coder aDecoder: NSCoder) {
+//        
+//        super.init()
+//    }
+    
     init(goal: String) {
         self.goal = goal
     }
+    
+    
+    
     
 }
 

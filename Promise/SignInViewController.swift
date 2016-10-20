@@ -109,7 +109,7 @@ class SignInViewController: UIViewController, LoginButtonDelegate {
                 self.signedIn(user)
                 let uid = user.uid
                 self.comm.configureDatabase()
-                self.comm.ref.child("users").child(uid).child("info").setValue(["userPhoto": "\(user.photoURL!)"])
+            self.comm.ref.child("users").child(uid).child("info").setValue(["userPhoto": "\(user.photoURL!)"])
             } else {
                 
             }
