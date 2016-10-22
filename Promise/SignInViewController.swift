@@ -98,6 +98,7 @@ class SignInViewController: UIViewController, LoginButtonDelegate {
     func loginButtonDidCompleteLogin(_ loginButton: LoginButton, result: LoginResult) {
         let credential = FIRFacebookAuthProvider.credential(withAccessToken: FBSDKAccessToken.current().tokenString)
         
+        print("LOGINRESULT: \(result)")
         
         FIRAuth.auth()?.signIn(with: credential, completion: { (user, error) in
             if let error = error {

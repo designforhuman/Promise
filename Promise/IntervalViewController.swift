@@ -22,7 +22,7 @@ class IntervalViewController: UITableViewController, UINavigationControllerDeleg
     let daysShort = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     var intervals: [Bool]!
-    var intervalToDisplay = ""
+    var intervalToDisplay: String!
     
     
     override func viewDidLoad() {
@@ -93,18 +93,21 @@ class IntervalViewController: UITableViewController, UINavigationControllerDeleg
             
 //            let label = cell.viewWithTag(1001) as! UILabel
             print("LABEL: \(label.text!)")
-            intervalToDisplay = ""
+//            intervalToDisplay = ""
             var intervalCount = 0
             var index = 0
+            var interalToDisplayTemp = ""
             for bool in intervals {
                 if bool {
-                    intervalToDisplay += "\(daysShort[index]) "
+                    interalToDisplayTemp += "\(daysShort[index]) "
                     intervalCount += 1
                 }
                 index += 1
             }
             if intervalCount == 7 {
                 intervalToDisplay = "Everyday"
+            } else {
+                intervalToDisplay = interalToDisplayTemp
             }
             
             

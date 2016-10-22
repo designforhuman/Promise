@@ -102,12 +102,12 @@ class FCViewController: UIViewController, UITableViewDataSource, UITableViewDele
   func loadAd() {
   }
 
-  func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-    guard let text = textField.text else { return true }
-
-    let newLength = text.characters.count + string.characters.count - range.length
-    return newLength <= self.msglength.intValue // Bool
-  }
+//  func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+//    guard let text = textField.text else { return true }
+//
+//    let newLength = text.characters.count + string.characters.count - range.length
+//    return newLength <= self.msglength.intValue // Bool
+//  }
 
   // UITableViewDataSource protocol methods
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

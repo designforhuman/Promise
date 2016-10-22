@@ -14,7 +14,7 @@ import Foundation
 class Promise {
     
     var goal = ""
-    var intervals = [true, true, true, true, true, true, true]
+    var interval = [true, true, true, true, true, true, true]
     var duration = 4
     var reward = ""
     var reminder = false
