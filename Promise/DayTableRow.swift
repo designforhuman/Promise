@@ -78,6 +78,8 @@ class DayTableRow: UITableViewCell, UICollectionViewDataSource, UICollectionView
 //    }
 
     
+    
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
         let paddingSpace = sectionInsets.left + sectionInsets.right
@@ -89,6 +91,7 @@ class DayTableRow: UITableViewCell, UICollectionViewDataSource, UICollectionView
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        
         return sectionInsets
     }
     

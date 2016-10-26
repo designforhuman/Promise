@@ -33,32 +33,32 @@ class SignInViewController: UIViewController, LoginButtonDelegate {
     let comm = FCViewController()
     
 
-  @IBOutlet weak var emailField: UITextField!
-  @IBOutlet weak var passwordField: UITextField!
+    @IBOutlet weak var emailField: UITextField!
+    @IBOutlet weak var passwordField: UITextField!
 
 
-  @IBAction func didTapSignIn(_ sender: AnyObject) {
-    // Sign In with credentials.
-    guard let email = emailField.text, let password = passwordField.text else { return }
-    FIRAuth.auth()?.signIn(withEmail: email, password: password) { (user, error) in
-        if let error = error {
-            print(error.localizedDescription)
-            return
+    @IBAction func didTapSignIn(_ sender: AnyObject) {
+        // Sign In with credentials.
+        guard let email = emailField.text, let password = passwordField.text else { return }
+        FIRAuth.auth()?.signIn(withEmail: email, password: password) { (user, error) in
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+            self.signedIn(user!)
         }
-        self.signedIn(user!)
     }
-  }
 
-  @IBAction func didTapSignUp(_ sender: AnyObject) {
-    guard let email = emailField.text, let password = passwordField.text else { return }
-    FIRAuth.auth()?.createUser(withEmail: email, password: password) { (user, error) in
-        if let error = error {
-            print(error.localizedDescription)
-            return
+    @IBAction func didTapSignUp(_ sender: AnyObject) {
+        guard let email = emailField.text, let password = passwordField.text else { return }
+        FIRAuth.auth()?.createUser(withEmail: email, password: password) { (user, error) in
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+            self.setDisplayName(user!)
         }
-        self.setDisplayName(user!)
     }
-  }
     
     
     override func viewDidAppear(_ animated: Bool) {

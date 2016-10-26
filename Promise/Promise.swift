@@ -19,6 +19,7 @@ class Promise {
     var reward = ""
     var reminder = false
     var days = [Day]()
+    var supporters = [Supporter]()
     
     
     init() {

@@ -7,11 +7,11 @@
 //
 
 import UIKit
-//import FacebookShare
 import FBSDKShareKit
+import Firebase
 
 
-class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewDelegate, UITextFieldDelegate, IntervalViewControllerDelegate, DurationViewControllerDelegate, FBSDKSharingDelegate {
+class PromiseViewController: UIViewController, UITableViewDataSource,UITableViewDelegate, UITextFieldDelegate, IntervalViewControllerDelegate, DurationViewControllerDelegate, FBSDKSharingDelegate {
     
 
     let comm = FCViewController()
@@ -81,49 +81,6 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
     
     
     
-    func updateData() {
-        data = ["goal": promise.goal,
-                "interval": intervalToDisplay,
-                "duration": durationToDisplay,
-                "reward": promise.reward]
-    }
-    
-    func prepareContent(uid: String) -> FBSDKShareLinkContent {
-        
-        let content = FBSDKShareLinkContent()
-        let urlPrefix = "https://promise-1432d.firebaseapp.com/?promiseId="
-        content.contentTitle = "I promise to \(promise.goal). \(intervalToDisplay) for \(durationToDisplay.lowercased()). Do you think I can make it?"
-        content.contentDescription = "\(promise.reward)"
-        content.contentURL = URL(string: urlPrefix + uid)
-        content.imageURL = URL(string: "https://promise-1432d.firebaseapp.com/static/images/defaultShare@2x.jpg")
-        
-        return content
-    }
-    
-    
-    func handleCompletion(_ uid: String, _ data: Dictionary<String, String>) {
-        // Write Data
-        comm.ref.child("users/\(uid)").observeSingleEvent(of: .value, with: { (snapshot) in
-            let hasChild = snapshot.hasChild("promise0")
-            // print("HASCHILD: \(value)")
-            if hasChild {
-                print("UPDATE PROMISE")
-                self.comm.ref.child("users/\(uid)/promise\(self.promises.count)").updateChildValues(data)
-            } else {
-                print("NEW PROMISE")
-                self.promises.append(self.promise)
-                self.comm.ref.child("users/\(uid)/promise\(self.promises.count)").setValue(data)
-            }
-        }) { (error) in
-            print(error.localizedDescription)
-        }
-        // scroll to top
-        self.tableView.contentOffset = CGPoint(x: 0, y: 0 - self.tableView.contentInset.top)
-    }
-    
-
-    
-  
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
@@ -142,11 +99,11 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
         // set communication
         comm.configureDatabase()
         
-        // set data
-        promise.makeInitialDays()
-        
         // set button
         buttonShare.isEnabled = false
+        
+        // set initial data
+        promise.makeInitialDays()
         
         // keyboard observer
         tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
@@ -163,17 +120,29 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
         
         helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R0")! as UITableViewCell, name: "S0R0")
         helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R1")! as! DayTableRow, name: "S0R1")
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R2")! as UITableViewCell, name: "S0R2")
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R3")! as UITableViewCell, name: "S0R3")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R2")! as! SupporterYesTableRow, name: "S0R2")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R3")! as! SupporterNoTableRow, name: "S0R3")
         helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R4")! as UITableViewCell, name: "S0R4")
         helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R5")! as UITableViewCell, name: "S0R5")
         helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R6")! as UITableViewCell, name: "S0R6")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R7")! as UITableViewCell, name: "S0R7")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R8")! as UITableViewCell, name: "S0R8")
         
-        helper?.hideCell("S0R6")
+        helper?.hideCell("S0R2")
+        helper?.hideCell("S0R3")
+        helper?.hideCell("S0R8")
         
-        let indexPath = helper.indexPathForCellNamed("S0R1")
-        let cell = helper.cellForRowAtIndexPath(indexPath!) as! DayTableRow
-        cell.promise = promise
+        
+        // set data
+        let dayIndexPath = helper.indexPathForCellNamed("S0R1")
+        let dayCell = helper.cellForRowAtIndexPath(dayIndexPath!) as! DayTableRow
+        dayCell.promise = self.promise
+        
+        
+        // if the user logged-in, download and show data
+//        if FIRAuth.auth()?.currentUser != nil {
+//            updateUserData()
+//        }
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -181,6 +150,8 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
+    
+    
     
     func viewWillDisappear(animated: Bool) {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
@@ -226,19 +197,16 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
         let cell = helper.cellForRowAtIndexPath(indexPath)
         let cellName = helper.cellNameAtIndexPath(indexPath)
         
-        if cellName == "S0R2" {
+        if cellName == "S0R4" {
             let label = cell.viewWithTag(1001) as! UILabel
             label.text = intervalToDisplay
         }
-        if cellName == "S0R3" {
+        if cellName == "S0R5" {
             let label = cell.viewWithTag(1002) as! UILabel
             durationSuffix = (promise.duration == 1) ? "" : "s"
             durationToDisplay = "\(promise.duration) Week\(durationSuffix)"
             label.text = durationToDisplay
         }
-//        if cellName == "S0R4" {
-//          
-//        }
         return helper.cellForRowAtIndexPath(indexPath)
     }
  
@@ -248,19 +216,19 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
         
         if let cellName = helper.cellNameAtIndexPath(indexPath) {
             switch cellName {
-            case "S0R5":
-                if !helper.cellIsVisible("S0R6") {
-                    helper?.showCell("S0R6")
+            case "S0R7":
+                if !helper.cellIsVisible("S0R8") {
+                    helper?.showCell("S0R8")
                 } else {
-                    helper?.hideCell("S0R6")
+                    helper?.hideCell("S0R8")
                 }
                 
             default:
-                helper.hideCell("S0R6")
+                helper.hideCell("S0R8")
             }
             
-            if cellName != "S0R5" {
-                helper?.hideCell("S0R6")
+            if cellName != "S0R7" {
+                helper?.hideCell("S0R8")
             }
         }
     }
@@ -270,21 +238,146 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
         
         if indexPath.section == 0 {
             let index = indexPath.row
-            switch index {
-                case 0:
-                    return 132
-                case 1:
-                    let cellHeight = (self.view.frame.width - 24) / 7 + 4 // temp
-                    return CGFloat(promise.duration) * cellHeight + 20 // 20: top and bottom paddings
-                case 6:
-                    return 216
-                default:
+            
+            if index == 0 {
+                return 132
+            } else if index == 1 {
+                let cellHeight = (self.view.frame.width - 24) / 7 + 4 // temp
+                return CGFloat(promise.duration) * cellHeight + 20 // 20: top and bottom paddings
+            } else if index == 2 {
+                if helper.cellIsVisible("S0R2") {
+                    return 150
+                }
+            } else if index == 3 {
+                if helper.cellIsVisible("S0R3") {
+                    return 150
+                }
+            } else if index == 6 {
+                if helper.cellIsVisible("S0R3") {
                     return tableView.rowHeight
+                } else {
+                    return 216
+                }
+            } else if index == 8 {
+                return 216
             }
+            
+//            switch index {
+//                case 0:
+//                    return 132
+//                case 1:
+//                    let cellHeight = (self.view.frame.width - 24) / 7 + 4 // temp
+//                    return CGFloat(promise.duration) * cellHeight + 20 // 20: top and bottom paddings
+//                case 2:
+//                    if helper.cellIsVisible("S0R2") {
+//                        return 150
+//                    }
+//                case 3:
+//                    print("HIHIHI")
+//                    if helper.cellIsVisible("S0R3") {
+//                        return 150
+//                    }
+//                case 6:
+//                    print("INDEXXXX: \(index)")
+//                    if helper.cellIsVisible("S0R8") {
+//                        return 216
+//                    }
+//                default:
+//                    return tableView.rowHeight
+//            }
         }
         
         return tableView.rowHeight
     }
+    
+    
+    
+    func updateData() {
+        data = ["goal": promise.goal,
+                "interval": intervalToDisplay,
+                "duration": durationToDisplay,
+                "reward": promise.reward]
+    }
+    
+    func prepareContent(uid: String) -> FBSDKShareLinkContent {
+        
+        let content = FBSDKShareLinkContent()
+        let urlPrefix = "https://promise-1432d.firebaseapp.com/?promiseId="
+        content.contentTitle = "I promise to \(promise.goal). \(intervalToDisplay) for \(durationToDisplay.lowercased()). Do you think I can make it?"
+        content.contentDescription = "\(promise.reward)"
+        content.contentURL = URL(string: urlPrefix + uid)
+        content.imageURL = URL(string: "https://promise-1432d.firebaseapp.com/static/images/defaultShare@2x.jpg")
+        
+        return content
+    }
+    
+    
+    func handleCompletion(_ uid: String, _ data: Dictionary<String, String>) {
+        // Write Data
+        comm.ref.child("users/\(uid)").observeSingleEvent(of: .value, with: { (snapshot) in
+            let hasChild = snapshot.hasChild("promise0")
+            // print("HASCHILD: \(value)")
+            if hasChild {
+                print("UPDATE PROMISE")
+                self.comm.ref.child("users/\(uid)/promise\(self.promises.count)").updateChildValues(data)
+            } else {
+                print("NEW PROMISE")
+                self.promises.append(self.promise)
+                self.comm.ref.child("users/\(uid)/promise\(self.promises.count)").setValue(data)
+            }
+        }) { (error) in
+            print(error.localizedDescription)
+        }
+        // scroll to top
+        self.tableView.contentOffset = CGPoint(x: 0, y: 0 - self.tableView.contentInset.top)
+    }
+    
+    
+    
+    
+    func updateUserData() {
+        
+        let supporterYesIndexPath = self.helper.indexPathForCellNamed("S0R2")
+        let supporterYesCell = self.helper.cellForRowAtIndexPath(supporterYesIndexPath!) as! SupporterYesTableRow
+        
+        let supporterNoIndexPath = self.helper.indexPathForCellNamed("S0R3")
+        let supporterNoCell = self.helper.cellForRowAtIndexPath(supporterNoIndexPath!) as! SupporterNoTableRow
+        
+        comm.ref.child("users/\(uid!)/promise0/users").observeSingleEvent(of: .value, with: { (snapshot) in
+            // Get user value
+//            let value = snapshot.value as? NSDictionary
+            var supporters = [NSDictionary]()
+            
+            for item in snapshot.children {
+                let child = item as! FIRDataSnapshot
+                let dict = child.value as! NSDictionary
+                supporters.append(dict)
+//                let reaction = supporters[0]["reaction"]
+//                print("TEMPITEMS: \(reaction)")
+            }
+            
+            for dict in supporters {
+                var supporter = dict as! [String: String]
+                if supporter["reaction"] == "yes" {
+                    supporterYesCell.supporterNames.append(supporter["userName"]!)
+                    supporterYesCell.supporterPhotoUrls.append(supporter["userPhoto"]!)
+                } else {
+                    supporterNoCell.supporterNames.append(supporter["userName"]!)
+                    supporterNoCell.supporterPhotoUrls.append(supporter["userPhoto"]!)
+                }
+                
+                self.promise.supporters.append(Supporter(name: supporter["userName"]!, photoUrl: supporter["userPhoto"]!, reaction: supporter["reaction"]!))
+//                print("INDEX: \(dict)")
+            }
+          
+            supporterYesCell.collectionView.reloadData()
+            supporterNoCell.collectionView.reloadData()
+            
+        }) { (error) in
+            print(error.localizedDescription)
+        }
+    }
+    
 
    
     func dismissKeyboard(){
@@ -441,6 +534,24 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
             handleCompletion(uid!, data)
         } else {
             print("post canceled")
+            
+            // data
+            // if the user logged-in, download and show data
+            helper.showCell("S0R2")
+            helper.showCell("S0R3")
+
+            let supporterYesIndexPath = helper.indexPathForCellNamed("S0R2")
+            let supporterYesCell = helper.cellForRowAtIndexPath(supporterYesIndexPath!) as! SupporterYesTableRow
+            supporterYesCell.promise = self.promise
+            
+            let supporterNoIndexPath = helper.indexPathForCellNamed("S0R3")
+            let supporterNoCell = helper.cellForRowAtIndexPath(supporterNoIndexPath!) as! SupporterNoTableRow
+            supporterNoCell.promise = self.promise
+            
+            updateUserData()
+
+            
+            // UI
             buttonShare.isHidden = true
             
             buttonCheckIn = UIButton()
@@ -464,7 +575,7 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
     }
     
     func sharerDidCancel(_ sharer: FBSDKSharing!) {
-        //        print("share canceled!")
+//        print("share canceled!")
     }
     
     
@@ -513,8 +624,6 @@ extension UIView {
         self.layer.insertSublayer(gradient, at: 0)
     }
 }
-
-
 
 
 
