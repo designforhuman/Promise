@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import FacebookShare
+//import FacebookShare
 import FBSDKShareKit
 
 
@@ -26,6 +26,8 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
     var data = [String: String]()
     let uid = AppState.sharedInstance.uid //"JWEFfYj52fVT4uCH3MUk6jgnSsK2"
     var textFieldGoal: UITextField?
+    var tapGesture: UITapGestureRecognizer!
+    var buttonCheckIn: UIButton!
     
     
     @IBOutlet weak var buttonShare: UIButton!
@@ -33,6 +35,10 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
     
     
     @IBAction func showShareActionSheet(_ sender: AnyObject) {
+        
+        // remove gesture oberserver
+        view.removeGestureRecognizer(tapGesture)
+        
         let optionMenu = UIAlertController(title: "Share to Confirm", message: "Be sure to share your Promise to others to get motivated!", preferredStyle: .actionSheet)
         
         updateData()
@@ -42,23 +48,28 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
             (alert: UIAlertAction!) -> Void in
             
             let shareDialog = FBSDKShareDialog()
-            shareDialog.fromViewController = self
+//            shareDialog.fromViewController = self
             shareDialog.shareContent = content
             shareDialog.delegate = self
 //            dialog.mode = FBSDKShareDialogMode.automatic
             shareDialog.show()
-            
-//            self.shareFacbook(comm, uid, data, content)
         })
         
         let saveAction = UIAlertAction(title: "FB Messenger", style: .default, handler: {
             (alert: UIAlertAction!) -> Void in
-//            self.shareFBMessenger(comm, uid, data, content)
+
+            let shareDialog = FBSDKMessageDialog()
+            shareDialog.shareContent = content
+            shareDialog.delegate = self
+            //            dialog.mode = FBSDKShareDialogMode.automatic
+            shareDialog.show()
         })
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: {
             (alert: UIAlertAction!) -> Void in
-            
+//            print("ACTION CANCELLED")
+            // add gesture oberserver
+            self.view.addGestureRecognizer(self.tapGesture)
         })
         
         optionMenu.addAction(deleteAction)
@@ -128,34 +139,52 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // set communication
         comm.configureDatabase()
         
+        // set data
+        promise.makeInitialDays()
+        
+        // set button
         buttonShare.isEnabled = false
         
+        // keyboard observer
+        tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
+//        view.addGestureRecognizer(tapGesture)
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+
         
         helper = TableViewHelper(tableView: tableView)
         
         // bottom table view: clear lines
-        tableView.tableHeaderView = UIView(frame: CGRect.zero)
-        tableView.tableFooterView = UIView(frame: CGRect.zero)
+//        helper.tableView.tableHeaderView = UIView(frame: CGRect.zero)
+//        helper.tableView.tableFooterView = UIView(frame: CGRect.zero)
         
         helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R0")! as UITableViewCell, name: "S0R0")
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R1")! as UITableViewCell, name: "S0R1")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R1")! as! DayTableRow, name: "S0R1")
         helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R2")! as UITableViewCell, name: "S0R2")
         helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R3")! as UITableViewCell, name: "S0R3")
         helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R4")! as UITableViewCell, name: "S0R4")
         helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R5")! as UITableViewCell, name: "S0R5")
-//        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R6")! as UITableViewCell, name: "S0R6")
-//        
-//        helper.hideCell("S0R6")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R6")! as UITableViewCell, name: "S0R6")
+        
+        helper?.hideCell("S0R6")
+        
+        let indexPath = helper.indexPathForCellNamed("S0R1")
+        let cell = helper.cellForRowAtIndexPath(indexPath!) as! DayTableRow
+        cell.promise = promise
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
+    }
+    
+    func viewWillDisappear(animated: Bool) {
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
+        NotificationCenter.default.removeObserver(self,  name: NSNotification.Name.UIKeyboardWillHide, object: nil)
     }
 
     override func didReceiveMemoryWarning() {
@@ -175,26 +204,28 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
         // #warning Incomplete implementation, return the number of rows
         return helper.numberOfRowsInSection(section)
     }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        // remove the first separator and chage the color to black
+        let cell = helper.cellForRowAtIndexPath(indexPath)
+        let cellName = helper.cellNameAtIndexPath(indexPath)
+        if cellName == "S0R0" {
+            cell.separatorInset = UIEdgeInsetsMake(0, tableView.bounds.width/2.0, 0, tableView.bounds.width/2.0)
+            
+            let bottomBorder = CALayer()
+            bottomBorder.backgroundColor = UIColor.black.cgColor
+            bottomBorder.frame = CGRect(x: 20, y: cell.frame.height - 1, width: cell.frame.width - 40, height: 1)
+            cell.layer.addSublayer(bottomBorder)
+        }
+        
+    }
 
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
-//        return cell
+
         let cell = helper.cellForRowAtIndexPath(indexPath)
-        
         let cellName = helper.cellNameAtIndexPath(indexPath)
-        if cellName == "S0R0" {
-            cell.separatorInset = UIEdgeInsetsMake(0, cell.bounds.size.width, 0, 0)
-            let photo = cell.viewWithTag(999) as! UIImageView
-            photo.layer.cornerRadius = 3
-        }
-        if cellName == "S0R1" {
-            // remove the first separator
-            // auto focus on the goal textfield
-//            textFieldGoal = cell.viewWithTag(1000) as? UITextField
-//            textFieldGoal?.delegate = self
-//            textFieldGoal?.becomeFirstResponder()
-        }
+        
         if cellName == "S0R2" {
             let label = cell.viewWithTag(1001) as! UILabel
             label.text = intervalToDisplay
@@ -205,6 +236,9 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
             durationToDisplay = "\(promise.duration) Week\(durationSuffix)"
             label.text = durationToDisplay
         }
+//        if cellName == "S0R4" {
+//          
+//        }
         return helper.cellForRowAtIndexPath(indexPath)
     }
  
@@ -212,96 +246,98 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-//        if let name = helper.cellNameAtIndexPath(indexPath) {
-//            switch name {
-//            case "S0R5":
-//                if !helper.cellIsVisible("S0R6") {
-//                    helper?.showCell("S0R6")
-//                } else {
-//                    helper?.hideCell("S0R6")
-//                }
-//                
-//            case "S0R6":
-//                helper?.hideCell(name)
-//                
-//            default:
-//                helper.hideCell(name)
-//                helper.showCell("S1R0")
-//            }
-//        }
+        if let cellName = helper.cellNameAtIndexPath(indexPath) {
+            switch cellName {
+            case "S0R5":
+                if !helper.cellIsVisible("S0R6") {
+                    helper?.showCell("S0R6")
+                } else {
+                    helper?.hideCell("S0R6")
+                }
+                
+            default:
+                helper.hideCell("S0R6")
+            }
+            
+            if cellName != "S0R5" {
+                helper?.hideCell("S0R6")
+            }
+        }
     }
 
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        
         if indexPath.section == 0 {
-            let i = indexPath.row
-            if (i == 0) {
-                return 215
-            }
-            if (i == 1) {
-                return 135
-            }
-            if (i == 6) {
-                return 216
+            let index = indexPath.row
+            switch index {
+                case 0:
+                    return 132
+                case 1:
+                    let cellHeight = (self.view.frame.width - 24) / 7 + 4 // temp
+                    return CGFloat(promise.duration) * cellHeight + 20 // 20: top and bottom paddings
+                case 6:
+                    return 216
+                default:
+                    return tableView.rowHeight
             }
         }
         
         return tableView.rowHeight
     }
-    
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
 
    
+    func dismissKeyboard(){
+        view.endEditing(true)
+    }
     
-    
-    func keyboardWillShow(notification: NSNotification) {
-        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-            if tableView.frame.origin.y == 0{
+    func keyboardWillShow(sender: NSNotification) {
+        
+        let heightThreshold: CGFloat = 0 // default is 64 because navigation bar reserves
+        
+        let tablePosX = tableView.contentOffset.y
+//        print("POS: \(tablePosX)")
+        if let keyboardSize = (sender.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+            if tablePosX > heightThreshold {
                 tableView.frame.origin.y -= keyboardSize.height - buttonShare.frame.height
             }
         }
         
+        // add gesture oberserver
+        view.addGestureRecognizer(tapGesture)
+        
+//        let userInfo = sender.userInfo!
+//        
+//        let keyboardSize: CGSize = (userInfo[UIKeyboardFrameBeginUserInfoKey]! as AnyObject).cgRectValue.size
+//        let offset: CGSize = (userInfo[UIKeyboardFrameEndUserInfoKey]! as AnyObject).cgRectValue.size
+//        
+//        if keyboardSize.height == offset.height {
+//            if self.view.frame.origin.y > heightThreshold {
+//                UIView.animate(withDuration: 0.1, animations: { () -> Void in
+//                    self.view.frame.origin.y -= keyboardSize.height
+//                })
+//            }
+//        } else {
+//            UIView.animate(withDuration: 0.1, animations: { () -> Void in
+//                self.view.frame.origin.y += keyboardSize.height - offset.height
+//            })
+//        }
+//        print(self.view.frame.origin.y)
     }
     
-    func keyboardWillHide(notification: NSNotification) {
-        if let keyboardSize = (notification.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-            if tableView.frame.origin.y != 0{
+    func keyboardWillHide(sender: NSNotification) {
+        if let keyboardSize = (sender.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+            if tableView.frame.origin.y != 0 {
                 tableView.frame.origin.y += keyboardSize.height - buttonShare.frame.height
             }
         }
+        
+        // remove gesture oberserver
+        view.removeGestureRecognizer(tapGesture)
+        
+//        let userInfo = sender.userInfo!
+//        let keyboardSize: CGSize = (userInfo[UIKeyboardFrameBeginUserInfoKey]! as AnyObject).cgRectValue.size
+//        self.view.frame.origin.y += keyboardSize.height
     }
     
     
@@ -311,7 +347,7 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
             let newLength = text.characters.count + string.characters.count - range.length
             if newLength > 2 {
                 buttonShare.isEnabled = true
-                buttonShare.applyGradient(colours: [UIColor.init(red: 216/255, green: 101/255, blue: 1, alpha: 1.0), UIColor.init(red: 86/255, green: 151/255, blue: 1, alpha: 1.0)])
+                buttonShare.applyGradient(colours: [UIColor.init(red: 216/255, green: 101/255, blue: 255/255, alpha: 1.0), UIColor.init(red: 86/255, green: 151/255, blue: 255/255, alpha: 1.0)])
             } else {
                 buttonShare.backgroundColor = UIColor.lightGray
             }
@@ -321,10 +357,16 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
     }
     
     
+//    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+//        return true
+//    }
+    
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
         let text = textField.text!.trimmingCharacters(in: CharacterSet.whitespaces)
         textField.resignFirstResponder()
-        print("TEXT: \(text)")
+//        print("TEXT: \(text)")
         
         if textField.tag == 1000 {
             // Goal
@@ -342,12 +384,25 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
         promise.interval = interval
         intervalToDisplay = days
         tableView.reloadData()
+        
+        reloadCell(cellName: "S0R1")
     }
     
     
     func durationViewController(_ controller: DurationViewController, didFinishSelect duration: Int) {
         promise.duration = duration
         tableView.reloadData()
+        
+        reloadCell(cellName: "S0R1")
+    }
+    
+    
+    func reloadCell(cellName: String) {
+        let indexPath = helper.indexPathForCellNamed(cellName)
+        let cell = helper.cellForRowAtIndexPath(indexPath!) as! DayTableRow
+        cell.promise = promise
+        cell.collectionView.reloadData()
+        tableView.reloadRows(at: [indexPath!], with: .automatic)
     }
     
     
@@ -380,9 +435,27 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
             //        print("DESCRIPTION: \(results[AnyHashable("postId")]!)")
             //        print("KEYFIRST: \(results.keys.first!)")
             //        print("VALUEFIRST: \(results.values.first!)")
+            
+            
+            
             handleCompletion(uid!, data)
         } else {
             print("post canceled")
+            buttonShare.isHidden = true
+            
+            buttonCheckIn = UIButton()
+            buttonCheckIn.setTitle("Check-In", for: .normal)
+            if #available(iOS 8.2, *) {
+                buttonCheckIn.titleLabel?.font = UIFont.systemFont(ofSize: 22, weight: UIFontWeightRegular)
+            } else {
+                // Fallback on earlier versions
+            }
+            buttonCheckIn.setTitleColor(UIColor.white, for: .normal)
+            buttonCheckIn.frame = CGRect(x: 0, y: self.view.frame.height - 70, width: self.view.frame.width, height: 70)
+            buttonCheckIn.backgroundColor = UIColor.yellow
+            buttonCheckIn.addTarget(self, action: #selector(self.checkIn), for: .touchUpInside)
+            self.view.addSubview(buttonCheckIn)
+            buttonCheckIn.applyGradient(colours: [UIColor.init(red: 255/255, green: 205/255, blue: 44/255, alpha: 1.0), UIColor.init(red: 255/255, green: 142/255, blue: 44/255, alpha: 1.0)])
         }
     }
     
@@ -395,7 +468,31 @@ class PromiseViewController: UIViewController,UITableViewDataSource,UITableViewD
     }
     
     
+    func checkIn(sender: UIButton) {
+        // button text animation (fade-in and out)
+        let button = sender as UIButton
+        let delay = 0.06
+        UIView.animate(withDuration: delay, animations: { () -> Void in
+            button.titleLabel?.alpha = 0.4
+        }) { (Bool) -> Void in
+            UIView.animate(withDuration: delay, delay: delay, options: .curveEaseInOut, animations: { () -> Void in
+                button.titleLabel?.alpha = 1.0
+            }, completion: nil)
+        }
+        
+        // add emoji
+        promise.days[0].emojiName = "sunglasses"
+//        reloadCell(cellName: "S0R1")
+        let indexPath = helper.indexPathForCellNamed("S0R1")
+        let cell = helper.cellForRowAtIndexPath(indexPath!) as! DayTableRow
+        cell.collectionView.reloadData()
+    }
+    
+    
+    
 }
+
+
 
 
 

@@ -92,7 +92,7 @@ class IntervalViewController: UITableViewController, UINavigationControllerDeleg
             intervals[indexPath.row] = !intervals[indexPath.row]
             
 //            let label = cell.viewWithTag(1001) as! UILabel
-            print("LABEL: \(label.text!)")
+//            print("LABEL: \(label.text!)")
 //            intervalToDisplay = ""
             var intervalCount = 0
             var index = 0

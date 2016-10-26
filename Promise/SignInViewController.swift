@@ -26,7 +26,6 @@ import FacebookLogin
 
 
 
-
 @objc(SignInViewController)
 class SignInViewController: UIViewController, LoginButtonDelegate {
     

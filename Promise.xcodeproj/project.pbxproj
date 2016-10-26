@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		545219491DBF6A5C003DF86F /* Day.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545219481DBF6A5C003DF86F /* Day.swift */; };
+		5474D50C1DBE2182009194C0 /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5474D50B1DBE2182009194C0 /* DayCell.swift */; };
+		5474D50E1DBE23D3009194C0 /* DayTableRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5474D50D1DBE23D3009194C0 /* DayTableRow.swift */; };
 		54887C6C1DB756F900B45497 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 54887C6B1DB756F900B45497 /* GoogleService-Info.plist */; };
 		54887C761DB7571B00B45497 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54887C6D1DB7571B00B45497 /* AppState.swift */; };
 		54887C771DB7571B00B45497 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54887C6E1DB7571B00B45497 /* Constants.swift */; };
@@ -28,6 +31,9 @@
 /* Begin PBXFileReference section */
 		049F36838BD185C84C909FDB /* Pods_Promise.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Promise.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		54100991920F48D3BF4049BE /* Pods-Promise.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Promise.release.xcconfig"; path = "Pods/Target Support Files/Pods-Promise/Pods-Promise.release.xcconfig"; sourceTree = "<group>"; };
+		545219481DBF6A5C003DF86F /* Day.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Day.swift; sourceTree = "<group>"; };
+		5474D50B1DBE2182009194C0 /* DayCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayCell.swift; sourceTree = "<group>"; };
+		5474D50D1DBE23D3009194C0 /* DayTableRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayTableRow.swift; sourceTree = "<group>"; };
 		54887C6B1DB756F900B45497 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		54887C6D1DB7571B00B45497 /* AppState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		54887C6E1DB7571B00B45497 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -95,6 +101,7 @@
 				54887C6D1DB7571B00B45497 /* AppState.swift */,
 				54887C6E1DB7571B00B45497 /* Constants.swift */,
 				54887C721DB7571B00B45497 /* Promise.swift */,
+				545219481DBF6A5C003DF86F /* Day.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -134,10 +141,12 @@
 				54AF120B1DB78CE5005D5EAC /* Model */,
 				54BA8A2E1DB7561B000FFC44 /* AppDelegate.swift */,
 				54887C6F1DB7571B00B45497 /* FCViewController.swift */,
+				54887C741DB7571B00B45497 /* SignInViewController.swift */,
 				54887C731DB7571B00B45497 /* PromiseViewController.swift */,
 				54AF12091DB783E7005D5EAC /* IntervalViewController.swift */,
 				54AF120D1DB78E87005D5EAC /* DurationViewController.swift */,
-				54887C741DB7571B00B45497 /* SignInViewController.swift */,
+				5474D50D1DBE23D3009194C0 /* DayTableRow.swift */,
+				5474D50B1DBE2182009194C0 /* DayCell.swift */,
 			);
 			path = Promise;
 			sourceTree = "<group>";
@@ -267,16 +276,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				545219491DBF6A5C003DF86F /* Day.swift in Sources */,
 				54BA8A2F1DB7561B000FFC44 /* AppDelegate.swift in Sources */,
 				54AF120A1DB783E7005D5EAC /* IntervalViewController.swift in Sources */,
 				54887C7A1DB7571B00B45497 /* MeasurementHelper.swift in Sources */,
 				54887C781DB7571B00B45497 /* FCViewController.swift in Sources */,
 				54887C7C1DB7571B00B45497 /* PromiseViewController.swift in Sources */,
 				54AF120E1DB78E87005D5EAC /* DurationViewController.swift in Sources */,
+				5474D50E1DBE23D3009194C0 /* DayTableRow.swift in Sources */,
 				54887C7E1DB7571B00B45497 /* TableViewHelper.swift in Sources */,
 				54887C7D1DB7571B00B45497 /* SignInViewController.swift in Sources */,
 				54887C761DB7571B00B45497 /* AppState.swift in Sources */,
 				54887C771DB7571B00B45497 /* Constants.swift in Sources */,
+				5474D50C1DBE2182009194C0 /* DayCell.swift in Sources */,
 				54887C7B1DB7571B00B45497 /* Promise.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

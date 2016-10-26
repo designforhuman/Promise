@@ -15,13 +15,15 @@ class Promise {
     
     var goal = ""
     var interval = [true, true, true, true, true, true, true]
-    var duration = 4
+    var duration: Int = 4
     var reward = ""
     var reminder = false
-//    var coverPhoto: UIImage()
+    var days = [Day]()
     
     
-    init() {}
+    init() {
+        
+    }
     
     
 //    required init?(coder aDecoder: NSCoder) {
@@ -33,6 +35,12 @@ class Promise {
         self.goal = goal
     }
     
+    
+    func makeInitialDays() {
+        for _ in 0...(self.duration * 7) {
+            days.append(Day())
+        }
+    }
     
     
     
