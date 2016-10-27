@@ -67,6 +67,9 @@ class SignInViewController: UIViewController, LoginButtonDelegate {
         }
     }
     
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -88,10 +91,14 @@ class SignInViewController: UIViewController, LoginButtonDelegate {
     
     
     func loginButton() {
-        let loginButton = LoginButton(frame: CGRect(origin: .zero, size: CGSize(width: 300, height: 60)), readPermissions: [.publicProfile, .email, .userFriends])
-        loginButton.center = view.center
+        let loginButton = LoginButton(frame: CGRect(origin: .zero, size: CGSize(width: 335, height: 70)), readPermissions: [.publicProfile, .email, .userFriends])
+//        loginButton.center = view.center
+        loginButton.translatesAutoresizingMaskIntoConstraints = true
         loginButton.delegate = self
         view.addSubview(loginButton)
+        
+        loginButton.center = CGPoint(x: view.bounds.midX, y: view.bounds.height - 100)
+        loginButton.autoresizingMask = [UIViewAutoresizing.flexibleLeftMargin, UIViewAutoresizing.flexibleRightMargin, UIViewAutoresizing.flexibleTopMargin, UIViewAutoresizing.flexibleBottomMargin]
     }
     
     func loginButtonDidCompleteLogin(_ loginButton: LoginButton, result: LoginResult) {

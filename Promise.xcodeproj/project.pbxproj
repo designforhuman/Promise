@@ -21,6 +21,7 @@
 		54887C7C1DB7571B00B45497 /* PromiseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54887C731DB7571B00B45497 /* PromiseViewController.swift */; };
 		54887C7D1DB7571B00B45497 /* SignInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54887C741DB7571B00B45497 /* SignInViewController.swift */; };
 		54887C7E1DB7571B00B45497 /* TableViewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54887C751DB7571B00B45497 /* TableViewHelper.swift */; };
+		54A2D0FD1DC1DB2900B8D9BD /* CheckInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A2D0FC1DC1DB2900B8D9BD /* CheckInViewController.swift */; };
 		54AF120A1DB783E7005D5EAC /* IntervalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54AF12091DB783E7005D5EAC /* IntervalViewController.swift */; };
 		54AF120E1DB78E87005D5EAC /* DurationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54AF120D1DB78E87005D5EAC /* DurationViewController.swift */; };
 		54BA8A2F1DB7561B000FFC44 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54BA8A2E1DB7561B000FFC44 /* AppDelegate.swift */; };
@@ -49,6 +50,7 @@
 		54887C731DB7571B00B45497 /* PromiseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromiseViewController.swift; sourceTree = "<group>"; };
 		54887C741DB7571B00B45497 /* SignInViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignInViewController.swift; sourceTree = "<group>"; };
 		54887C751DB7571B00B45497 /* TableViewHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewHelper.swift; sourceTree = "<group>"; };
+		54A2D0FC1DC1DB2900B8D9BD /* CheckInViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInViewController.swift; sourceTree = "<group>"; };
 		54AF12091DB783E7005D5EAC /* IntervalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntervalViewController.swift; sourceTree = "<group>"; };
 		54AF120D1DB78E87005D5EAC /* DurationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DurationViewController.swift; sourceTree = "<group>"; };
 		54BA8A2B1DB7561B000FFC44 /* Promise.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Promise.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -163,6 +165,7 @@
 				54887C731DB7571B00B45497 /* PromiseViewController.swift */,
 				54AF12091DB783E7005D5EAC /* IntervalViewController.swift */,
 				54AF120D1DB78E87005D5EAC /* DurationViewController.swift */,
+				54A2D0FC1DC1DB2900B8D9BD /* CheckInViewController.swift */,
 			);
 			name = VC;
 			sourceTree = "<group>";
@@ -305,6 +308,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				545219491DBF6A5C003DF86F /* Day.swift in Sources */,
+				54A2D0FD1DC1DB2900B8D9BD /* CheckInViewController.swift in Sources */,
 				54BA8A2F1DB7561B000FFC44 /* AppDelegate.swift in Sources */,
 				540980CB1DC0943100FD5899 /* Supporter.swift in Sources */,
 				54BF3FBA1DC06B40005E8D9E /* SupporterCell.swift in Sources */,

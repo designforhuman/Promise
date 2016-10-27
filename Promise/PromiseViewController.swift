@@ -11,7 +11,7 @@ import FBSDKShareKit
 import Firebase
 
 
-class PromiseViewController: UIViewController, UITableViewDataSource,UITableViewDelegate, UITextFieldDelegate, IntervalViewControllerDelegate, DurationViewControllerDelegate, FBSDKSharingDelegate {
+class PromiseViewController: UIViewController, UITableViewDataSource,UITableViewDelegate, UITextFieldDelegate, IntervalViewControllerDelegate, DurationViewControllerDelegate, FBSDKSharingDelegate, CheckInViewControllerDelegate {
     
 
     let comm = FCViewController()
@@ -70,6 +70,13 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
 //            print("ACTION CANCELLED")
             // add gesture oberserver
             self.view.addGestureRecognizer(self.tapGesture)
+            
+            // remove blur background
+//            for subview in self.view.subviews {
+//                if subview is UIVisualEffectView {
+//                    subview.removeFromSuperview()
+//                }
+//            }
         })
         
         optionMenu.addAction(deleteAction)
@@ -150,6 +157,9 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
+    
+    
+    
     
     
     
@@ -499,21 +509,34 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     }
     
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "ShowInterval" {
-//            print("SHOWINTERVAL")
-            let controller = segue.destination as! IntervalViewController
-            controller.delegate = self
-            controller.intervals = promise.interval
-            controller.intervalToDisplay = self.intervalToDisplay
-            
-        } else if segue.identifier == "ShowDuration" {
-//            print("SHOWDURATION")
-            let controller = segue.destination as! DurationViewController
-            controller.delegate = self
-            controller.selectedWeeks = promise.duration
-        }
+    func checkInViewController(_ controller: CheckInViewController, didSelect emoji: String) {
+        
+        // add emoji
+        promise.days[0].emojiName = emoji
+        let indexPath = helper.indexPathForCellNamed("S0R1")
+        let cell = helper.cellForRowAtIndexPath(indexPath!) as! DayTableRow
+        cell.collectionView.reloadData()
+        cell.curDay += 1
+        
+        // change button
+        buttonCheckIn.backgroundColor = UIColor.init(red: 0, green: 0, blue: 0, alpha: 0.7)
+        buttonCheckIn.layer.sublayers?[0].removeFromSuperlayer()
+        buttonCheckIn.setTitle("Done!", for: .normal)
+        buttonCheckIn.isEnabled = false
+
+
+        // button text animation (fade-in and out) // for animation reference
+//        let delay = 0.06
+//        UIView.animate(withDuration: delay, animations: { () -> Void in
+//            button.titleLabel?.alpha = 0.4
+//        }) { (Bool) -> Void in
+//            UIView.animate(withDuration: delay, delay: delay, options: .curveEaseInOut, animations: { () -> Void in
+//                button.titleLabel?.alpha = 1.0
+//            }, completion: nil)
+//        }
     }
+    
+    
     
     /*!
      @abstract Sent to the delegate when the share completes without error or cancellation.
@@ -562,6 +585,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
                 // Fallback on earlier versions
             }
             buttonCheckIn.setTitleColor(UIColor.white, for: .normal)
+            buttonCheckIn.setTitleColor(UIColor.init(red: 1, green: 1, blue: 1, alpha: 0.5), for: .highlighted)
             buttonCheckIn.frame = CGRect(x: 0, y: self.view.frame.height - 70, width: self.view.frame.width, height: 70)
             buttonCheckIn.backgroundColor = UIColor.yellow
             buttonCheckIn.addTarget(self, action: #selector(self.checkIn), for: .touchUpInside)
@@ -579,26 +603,32 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     }
     
     
-    func checkIn(sender: UIButton) {
-        // button text animation (fade-in and out)
-        let button = sender as UIButton
-        let delay = 0.06
-        UIView.animate(withDuration: delay, animations: { () -> Void in
-            button.titleLabel?.alpha = 0.4
-        }) { (Bool) -> Void in
-            UIView.animate(withDuration: delay, delay: delay, options: .curveEaseInOut, animations: { () -> Void in
-                button.titleLabel?.alpha = 1.0
-            }, completion: nil)
-        }
-        
-        // add emoji
-        promise.days[0].emojiName = "sunglasses"
-//        reloadCell(cellName: "S0R1")
-        let indexPath = helper.indexPathForCellNamed("S0R1")
-        let cell = helper.cellForRowAtIndexPath(indexPath!) as! DayTableRow
-        cell.collectionView.reloadData()
+    func checkIn() {
+        performSegue(withIdentifier: "ShowCheckIn", sender: nil)
     }
     
+    
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "ShowInterval" {
+            //            print("SHOWINTERVAL")
+            let controller = segue.destination as! IntervalViewController
+            controller.delegate = self
+            controller.intervals = promise.interval
+            controller.intervalToDisplay = self.intervalToDisplay
+            
+        } else if segue.identifier == "ShowDuration" {
+            //            print("SHOWDURATION")
+            let controller = segue.destination as! DurationViewController
+            controller.delegate = self
+            controller.selectedWeeks = promise.duration
+            
+        } else if segue.identifier == "ShowCheckIn" {
+            print("SHOWCHECKIN")
+            let controller = segue.destination as! CheckInViewController
+            controller.delegate = self
+        }
+    }
     
     
 }
