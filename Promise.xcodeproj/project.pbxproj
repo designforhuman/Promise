@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		540980CB1DC0943100FD5899 /* Supporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540980CA1DC0943100FD5899 /* Supporter.swift */; };
+		54423F5A1DC882B000ECCB10 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54423F591DC882B000ECCB10 /* DataModel.swift */; };
 		545219491DBF6A5C003DF86F /* Day.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545219481DBF6A5C003DF86F /* Day.swift */; };
 		5474D50C1DBE2182009194C0 /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5474D50B1DBE2182009194C0 /* DayCell.swift */; };
 		5474D50E1DBE23D3009194C0 /* DayTableRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5474D50D1DBE23D3009194C0 /* DayTableRow.swift */; };
@@ -22,6 +23,7 @@
 		54887C7D1DB7571B00B45497 /* SignInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54887C741DB7571B00B45497 /* SignInViewController.swift */; };
 		54887C7E1DB7571B00B45497 /* TableViewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54887C751DB7571B00B45497 /* TableViewHelper.swift */; };
 		54A2D0FD1DC1DB2900B8D9BD /* CheckInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A2D0FC1DC1DB2900B8D9BD /* CheckInViewController.swift */; };
+		54A2D0FF1DC31E5200B8D9BD /* EmailSignInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A2D0FE1DC31E5200B8D9BD /* EmailSignInViewController.swift */; };
 		54AF120A1DB783E7005D5EAC /* IntervalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54AF12091DB783E7005D5EAC /* IntervalViewController.swift */; };
 		54AF120E1DB78E87005D5EAC /* DurationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54AF120D1DB78E87005D5EAC /* DurationViewController.swift */; };
 		54BA8A2F1DB7561B000FFC44 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54BA8A2E1DB7561B000FFC44 /* AppDelegate.swift */; };
@@ -37,6 +39,7 @@
 		049F36838BD185C84C909FDB /* Pods_Promise.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Promise.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		540980CA1DC0943100FD5899 /* Supporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Supporter.swift; sourceTree = "<group>"; };
 		54100991920F48D3BF4049BE /* Pods-Promise.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Promise.release.xcconfig"; path = "Pods/Target Support Files/Pods-Promise/Pods-Promise.release.xcconfig"; sourceTree = "<group>"; };
+		54423F591DC882B000ECCB10 /* DataModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataModel.swift; sourceTree = "<group>"; };
 		545219481DBF6A5C003DF86F /* Day.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Day.swift; sourceTree = "<group>"; };
 		5474D50B1DBE2182009194C0 /* DayCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayCell.swift; sourceTree = "<group>"; };
 		5474D50D1DBE23D3009194C0 /* DayTableRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayTableRow.swift; sourceTree = "<group>"; };
@@ -51,6 +54,7 @@
 		54887C741DB7571B00B45497 /* SignInViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignInViewController.swift; sourceTree = "<group>"; };
 		54887C751DB7571B00B45497 /* TableViewHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewHelper.swift; sourceTree = "<group>"; };
 		54A2D0FC1DC1DB2900B8D9BD /* CheckInViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInViewController.swift; sourceTree = "<group>"; };
+		54A2D0FE1DC31E5200B8D9BD /* EmailSignInViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmailSignInViewController.swift; sourceTree = "<group>"; };
 		54AF12091DB783E7005D5EAC /* IntervalViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntervalViewController.swift; sourceTree = "<group>"; };
 		54AF120D1DB78E87005D5EAC /* DurationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DurationViewController.swift; sourceTree = "<group>"; };
 		54BA8A2B1DB7561B000FFC44 /* Promise.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Promise.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -108,11 +112,12 @@
 		54AF120B1DB78CE5005D5EAC /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				54887C6D1DB7571B00B45497 /* AppState.swift */,
-				54887C6E1DB7571B00B45497 /* Constants.swift */,
+				54423F591DC882B000ECCB10 /* DataModel.swift */,
 				54887C721DB7571B00B45497 /* Promise.swift */,
 				545219481DBF6A5C003DF86F /* Day.swift */,
 				540980CA1DC0943100FD5899 /* Supporter.swift */,
+				54887C6D1DB7571B00B45497 /* AppState.swift */,
+				54887C6E1DB7571B00B45497 /* Constants.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -147,12 +152,12 @@
 		54BA8A2D1DB7561B000FFC44 /* Promise */ = {
 			isa = PBXGroup;
 			children = (
+				54BA8A2E1DB7561B000FFC44 /* AppDelegate.swift */,
 				5441C1BB1DB8C9FB00F937A8 /* Support */,
 				54AF120C1DB78CEC005D5EAC /* Helper */,
 				54AF120B1DB78CE5005D5EAC /* Model */,
 				54BF3FB71DC0690E005E8D9E /* VC */,
 				54BF3FB81DC0691D005E8D9E /* Cell */,
-				54BA8A2E1DB7561B000FFC44 /* AppDelegate.swift */,
 			);
 			path = Promise;
 			sourceTree = "<group>";
@@ -162,6 +167,7 @@
 			children = (
 				54887C6F1DB7571B00B45497 /* FCViewController.swift */,
 				54887C741DB7571B00B45497 /* SignInViewController.swift */,
+				54A2D0FE1DC31E5200B8D9BD /* EmailSignInViewController.swift */,
 				54887C731DB7571B00B45497 /* PromiseViewController.swift */,
 				54AF12091DB783E7005D5EAC /* IntervalViewController.swift */,
 				54AF120D1DB78E87005D5EAC /* DurationViewController.swift */,
@@ -321,9 +327,11 @@
 				5474D50E1DBE23D3009194C0 /* DayTableRow.swift in Sources */,
 				54887C7E1DB7571B00B45497 /* TableViewHelper.swift in Sources */,
 				54887C7D1DB7571B00B45497 /* SignInViewController.swift in Sources */,
+				54423F5A1DC882B000ECCB10 /* DataModel.swift in Sources */,
 				54887C761DB7571B00B45497 /* AppState.swift in Sources */,
 				54887C771DB7571B00B45497 /* Constants.swift in Sources */,
 				5474D50C1DBE2182009194C0 /* DayCell.swift in Sources */,
+				54A2D0FF1DC31E5200B8D9BD /* EmailSignInViewController.swift in Sources */,
 				54BF3FB61DC068FF005E8D9E /* SupporterYesTableRow.swift in Sources */,
 				54887C7B1DB7571B00B45497 /* Promise.swift in Sources */,
 			);
@@ -444,6 +452,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 35TJL4Y5T9;
 				INFOPLIST_FILE = Promise/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.daylightdesign.Promise;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -459,6 +468,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 35TJL4Y5T9;
 				INFOPLIST_FILE = Promise/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.daylightdesign.Promise;
 				PRODUCT_NAME = "$(TARGET_NAME)";

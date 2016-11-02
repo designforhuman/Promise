@@ -31,6 +31,7 @@ class SignInViewController: UIViewController, LoginButtonDelegate {
     
     
     let comm = FCViewController()
+    var dataModel: DataModel!
     
 
     @IBOutlet weak var emailField: UITextField!
@@ -191,5 +192,20 @@ class SignInViewController: UIViewController, LoginButtonDelegate {
 //    performSegue(withIdentifier: Constants.Segues.SignInToFp, sender: nil)
     performSegue(withIdentifier: "ShowMain", sender: nil)
   }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "ShowMain" {
+            let navigationController = segue.destination as! UINavigationController
+            let controller = navigationController.topViewController as! PromiseViewController
+            controller.dataModel = dataModel
+        }
+    }
 
 }
+
+
+
+
+
+
+

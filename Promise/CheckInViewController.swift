@@ -12,6 +12,7 @@ import UIKit
 
 protocol CheckInViewControllerDelegate: class {
     func checkInViewController(_ controller: CheckInViewController, didSelect emoji: String)
+    func checkInViewControllerDidCancel(_ controller: CheckInViewController)
 }
 
 
@@ -21,6 +22,7 @@ class CheckInViewController: UIViewController {
     
     
     var delegate: CheckInViewControllerDelegate?
+//    var blurView: UIView?
     
     
     @IBOutlet weak var camera: UIView!
@@ -45,9 +47,14 @@ class CheckInViewController: UIViewController {
     }
     
     @IBAction func cancel(_ sender: Any) {
+        delegate?.checkInViewControllerDidCancel(self)
         dismiss(animated: true, completion: nil)
     }
     
+    
+    override func viewWillAppear(_ animated: Bool) {
+//        view.insertSubview(blurView!, at: 0)
+    }
     
 
     override func viewDidLoad() {
@@ -81,14 +88,6 @@ class CheckInViewController: UIViewController {
     */
     
 
-    
-    
-//    func backgroundBlur() {
-//        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.light)
-//        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-//        blurEffectView.frame = view.bounds
-//        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight] // for supporting device rotation
-//        view.addSubview(blurEffectView)
-//    }
+
 
 }

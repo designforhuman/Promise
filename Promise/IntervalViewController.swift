@@ -36,6 +36,8 @@ class IntervalViewController: UITableViewController, UINavigationControllerDeleg
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
         delegate?.intervalViewController(self, didFinishEditing: intervals, days: intervalToDisplay)
+        
+        
     }
     
     

@@ -90,6 +90,10 @@ public struct TableViewHelper {
         
         if initialCount == numberOfSections() {
             tableView.insertRows(at: addPaths, with: .top)
+//            print("TOPTOP: \(tableView.contentOffset.y)")
+            if tableView.contentOffset.y > 60 {
+                tableView.setContentOffset(CGPoint.init(x: 0, y: 216+64), animated: true) // 64 is the height of nav bar
+            }
         } else {
             tableView.reloadData()
         }

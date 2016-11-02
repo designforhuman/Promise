@@ -10,12 +10,23 @@ import Foundation
 
 
 
-class Day {
+class Day: NSObject, NSCoding {
     
     var emojiName = ""
     
     
-    init() {}
+    required init?(coder aDecoder: NSCoder) {
+        emojiName = aDecoder.decodeObject(forKey: "EmojiName") as! String
+        super.init()
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    func encode(with aCoder: NSCoder) {
+        
+    }
     
     
 }
