@@ -16,10 +16,10 @@ class DataModel {
     
     
     init() {
-        loadChecklists()
+        loadLists()
         registerDefaults()
         handleFirstTime()
-        print("DIRECTORYYYY: \(documentsDirectory())")
+//        print("DIRECTORYYYY: \(documentsDirectory())")
     }
     
     
@@ -32,7 +32,7 @@ class DataModel {
         return documentsDirectory().appendingPathComponent("Promise.plist")
     }
     
-    func saveChecklists() {
+    func saveLists() {
         let data = NSMutableData()
         let archiver = NSKeyedArchiver(forWritingWith: data)
         archiver.encode(lists, forKey: "Promise")
@@ -40,7 +40,7 @@ class DataModel {
         data.write(to: dataFilePath(), atomically: true)
     }
     
-    func loadChecklists() {
+    func loadLists() {
         let path = dataFilePath()
         if let data = try? Data(contentsOf: path) {
             let unarchiver = NSKeyedUnarchiver(forReadingWith: data)

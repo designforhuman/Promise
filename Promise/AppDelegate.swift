@@ -112,7 +112,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     
     func saveData() {
-        dataModel.saveChecklists()
+        dataModel.saveLists()
     }
     
     

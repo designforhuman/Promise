@@ -678,53 +678,38 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="109"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="If I " adjustsFontSizeToFit="NO" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="NTV-qY-Px0">
-                                                    <rect key="frame" x="20" y="18" width="27" height="30"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" constant="27" id="GwZ-pP-hFf"/>
-                                                        <constraint firstAttribute="height" constant="30" id="gTp-lQ-ZbF"/>
-                                                    </constraints>
-                                                    <nil key="textColor"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="22"/>
-                                                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
-                                                    <connections>
-                                                        <outlet property="delegate" destination="yk3-mP-K0e" id="fNf-w3-ueJ"/>
-                                                    </connections>
-                                                </textField>
-                                                <button opaque="NO" tag="1003" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EIV-tc-ioC">
-                                                    <rect key="frame" x="49" y="18" width="306" height="30"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="height" constant="30" id="tO0-Fe-dVD"/>
-                                                    </constraints>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="22"/>
-                                                    <state key="normal" title="succeed,">
-                                                        <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                                    </state>
-                                                    <connections>
-                                                        <action selector="rewardToggle:" destination="yk3-mP-K0e" eventType="touchUpInside" id="lDU-61-l4W"/>
-                                                    </connections>
-                                                </button>
-                                                <textField opaque="NO" clipsSubviews="YES" tag="1004" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="I'll do this" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="WJG-OV-Aso">
+                                                <textField opaque="NO" clipsSubviews="YES" tag="1004" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="do this" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="WJG-OV-Aso">
                                                     <rect key="frame" x="20" y="49" width="335" height="60"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="60" id="3OL-hy-Q6m"/>
                                                     </constraints>
                                                     <nil key="textColor"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="22"/>
-                                                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences" returnKeyType="done" enablesReturnKeyAutomatically="YES"/>
+                                                    <textInputTraits key="textInputTraits" returnKeyType="done"/>
                                                     <connections>
                                                         <outlet property="delegate" destination="yk3-mP-K0e" id="uDH-aI-fTU"/>
                                                     </connections>
                                                 </textField>
+                                                <button opaque="NO" tag="1003" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EIV-tc-ioC">
+                                                    <rect key="frame" x="20" y="18" width="335" height="30"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="30" id="tO0-Fe-dVD"/>
+                                                    </constraints>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                                    <state key="normal" title="If I succeed, I'll">
+                                                        <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                    <connections>
+                                                        <action selector="rewardToggle:" destination="yk3-mP-K0e" eventType="touchUpInside" id="lDU-61-l4W"/>
+                                                    </connections>
+                                                </button>
                                             </subviews>
                                             <constraints>
                                                 <constraint firstAttribute="trailing" secondItem="EIV-tc-ioC" secondAttribute="trailing" constant="20" id="3Fp-XZ-gcv"/>
-                                                <constraint firstItem="EIV-tc-ioC" firstAttribute="leading" secondItem="NTV-qY-Px0" secondAttribute="trailing" constant="2" id="82m-7f-EdA"/>
                                                 <constraint firstItem="EIV-tc-ioC" firstAttribute="top" secondItem="LOV-7z-1LK" secondAttribute="top" constant="18" id="Fao-fE-tD8"/>
                                                 <constraint firstAttribute="bottom" secondItem="WJG-OV-Aso" secondAttribute="bottom" id="X5I-lr-YBZ"/>
-                                                <constraint firstItem="NTV-qY-Px0" firstAttribute="top" secondItem="LOV-7z-1LK" secondAttribute="top" constant="18" id="bJb-3I-bve"/>
                                                 <constraint firstItem="WJG-OV-Aso" firstAttribute="leading" secondItem="LOV-7z-1LK" secondAttribute="leading" constant="20" id="cEI-oW-4Xd"/>
-                                                <constraint firstItem="NTV-qY-Px0" firstAttribute="leading" secondItem="LOV-7z-1LK" secondAttribute="leading" constant="20" id="lnf-lb-OyK"/>
+                                                <constraint firstItem="EIV-tc-ioC" firstAttribute="leading" secondItem="LOV-7z-1LK" secondAttribute="leading" constant="20" id="nIm-3c-ZND"/>
                                                 <constraint firstAttribute="trailing" secondItem="WJG-OV-Aso" secondAttribute="trailing" constant="20" id="oNb-AR-mSm"/>
                                             </constraints>
                                         </tableViewCellContentView>
@@ -742,11 +727,11 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="22"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="gjj-aG-EIW">
+                                                <switch opaque="NO" tag="1006" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="gjj-aG-EIW">
                                                     <rect key="frame" x="306" y="21" width="51" height="31"/>
                                                     <color key="onTintColor" red="1" green="0.55686274509803924" blue="0.17254901960784313" alpha="1" colorSpace="calibratedRGB"/>
                                                     <connections>
-                                                        <action selector="reminderSwitch:" destination="yk3-mP-K0e" eventType="valueChanged" id="vqp-Sn-Mix"/>
+                                                        <action selector="reminder:" destination="yk3-mP-K0e" eventType="valueChanged" id="WQJ-nC-hJr"/>
                                                     </connections>
                                                 </switch>
                                             </subviews>
@@ -1022,7 +1007,6 @@
         <!--Navigation Controller-->
         <scene sceneID="KkB-lH-7my">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="olu-tZ-4gw" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <navigationController storyboardIdentifier="PromiseNavigationController" automaticallyAdjustsScrollViewInsets="NO" useStoryboardIdentifierAsRestorationIdentifier="YES" id="WMx-P0-eLs" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="8wx-EZ-LfJ">
@@ -1034,6 +1018,7 @@
                         <segue destination="yk3-mP-K0e" kind="relationship" relationship="rootViewController" id="nuj-H8-lpY"/>
                     </connections>
                 </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="olu-tZ-4gw" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1570" y="-99"/>
         </scene>

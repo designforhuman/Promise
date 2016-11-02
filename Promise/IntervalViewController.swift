@@ -98,10 +98,10 @@ class IntervalViewController: UITableViewController, UINavigationControllerDeleg
 //            intervalToDisplay = ""
             var intervalCount = 0
             var index = 0
-            var interalToDisplayTemp = ""
+            var intervalToDisplayTemp = ""
             for bool in intervals {
                 if bool {
-                    interalToDisplayTemp += "\(daysShort[index]) "
+                    intervalToDisplayTemp += "\(daysShort[index]) "
                     intervalCount += 1
                 }
                 index += 1
@@ -109,7 +109,7 @@ class IntervalViewController: UITableViewController, UINavigationControllerDeleg
             if intervalCount == 7 {
                 intervalToDisplay = "Everyday"
             } else {
-                intervalToDisplay = interalToDisplayTemp
+                intervalToDisplay = intervalToDisplayTemp
             }
             
             

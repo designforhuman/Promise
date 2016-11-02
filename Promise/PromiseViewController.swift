@@ -32,7 +32,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     var blurView: UIView?
     var date = Date()
     var dateLabel: UILabel?
-
+    var reminderSwitch: UISwitch!
     
     
     @IBOutlet weak var buttonShare: UIButton!
@@ -42,13 +42,13 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     @IBAction func rewardToggle(_ rewardToggle: UIButton) {
         if rewardToggle.isTouchInside {
 //            print("TOUCHTOUCH: \(rewardToggle.titleLabel!.text!)")
-            let label = (rewardToggle.titleLabel!.text! == "succeed,") ? "fail," : "succeed,"
+            let label = (rewardToggle.titleLabel!.text! == "If I succeed, I'll") ? "If I fail, I'll" : "If I succeed, I'll"
             rewardToggle.setTitle(label, for: .normal)
-            dataModel.lists[promiseNum].rewardPrefix = "If I \(label)"
+            dataModel.lists[promiseNum].rewardPrefix = label
         }
     }
     
-    @IBAction func reminderSwitch(_ switchControl: UISwitch) {
+    @IBAction func reminder(_ switchControl: UISwitch) {
         if !helper.cellIsVisible("S0R8") && dateLabel?.text == "Reminder" {
             helper?.showCell("S0R8")
         } else {
@@ -162,17 +162,14 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
         // set communication
         comm.configureDatabase()
         
-        // set button and text
+        // set initial status
         buttonShare.isEnabled = false
         dateLabel?.text = "Reminder"
         
         // set initial data
-//        promise = Promise()
-//        dataModel.lists.append(promise)
         print("DATAMODEL: \(dataModel)")
         print("LISTS: \(dataModel.lists)")
         dataModel.lists[promiseNum].makeInitialDays()
-        
         
         // keyboard observer
         tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
@@ -276,6 +273,9 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
             let goal = dataModel.lists[promiseNum].goal
             let textField = cell.viewWithTag(1000) as! UITextField
             textField.text = goal
+            if goal.characters.count > 2 {
+                enableButtonShare()
+            }
         }
         
         // interval
@@ -283,6 +283,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
             let label = cell.viewWithTag(1001) as! UILabel
             label.text = intervalToDisplay
         }
+        
         // duration
         if cellName == "S0R5" {
             let label = cell.viewWithTag(1002) as! UILabel
@@ -290,17 +291,27 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
             durationToDisplay = "\(dataModel.lists[promiseNum].duration) Week\(durationSuffix)"
             label.text = durationToDisplay
         }
-//        if cellName == "S0R6" {
-//            rewardToggleButton = cell.viewWithTag(1003) as! UIButton
-//        }
+        
+        // reward
+        if cellName == "S0R6" {
+            let button = cell.viewWithTag(1003) as! UIButton
+            button.setTitle(dataModel.lists[promiseNum].rewardPrefix, for: .normal)
+            
+            let textField = cell.viewWithTag(1004) as! UITextField
+            textField.text = dataModel.lists[promiseNum].reward
+        }
+
         // text: reminder
-//        if cellName == "S0R7" {
-//            dateLabel = cell.viewWithTag(1005) as! UILabel
-//        }
-//        if cellName == "S0R7" {
-//            let datePicker = cell.viewWithTag(1005) as! UIDatePicker
-//            
-//        }
+        if cellName == "S0R7" {
+            dateLabel = cell.viewWithTag(1005) as! UILabel
+            updateDueDateLabel()
+            
+            reminderSwitch = cell.viewWithTag(1006) as! UISwitch
+            if dataModel.lists[promiseNum].shouldRemind {
+                reminderSwitch.setOn(true, animated: false)
+            }
+        }
+
         return helper.cellForRowAtIndexPath(indexPath)
     }
  
@@ -456,36 +467,19 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     
     func keyboardWillShow(sender: NSNotification) {
         
-        let heightThreshold: CGFloat = 30 // default is 64 because navigation bar reserves
-        
-        let tablePosY = tableView.contentOffset.y
-//        print("POS: \(tablePosY)")
-        if let keyboardSize = (sender.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-            if tablePosY > heightThreshold {
-                tableView.frame.origin.y -= keyboardSize.height - buttonShare.frame.height
+        let indexPath = helper.indexPathForCellNamed("S0R6")
+        let cell = helper.cellForRowAtIndexPath(indexPath!)
+        if let textField = cell.viewWithTag(1004) {
+            if textField.isFirstResponder {
+                if let keyboardSize = (sender.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+                    tableView.frame.origin.y -= keyboardSize.height - buttonShare.frame.height
+                }
             }
         }
         
         // add gesture oberserver
         view.addGestureRecognizer(tapGesture)
-        
-//        let userInfo = sender.userInfo!
-//        
-//        let keyboardSize: CGSize = (userInfo[UIKeyboardFrameBeginUserInfoKey]! as AnyObject).cgRectValue.size
-//        let offset: CGSize = (userInfo[UIKeyboardFrameEndUserInfoKey]! as AnyObject).cgRectValue.size
-//        
-//        if keyboardSize.height == offset.height {
-//            if self.view.frame.origin.y > heightThreshold {
-//                UIView.animate(withDuration: 0.1, animations: { () -> Void in
-//                    self.view.frame.origin.y -= keyboardSize.height
-//                })
-//            }
-//        } else {
-//            UIView.animate(withDuration: 0.1, animations: { () -> Void in
-//                self.view.frame.origin.y += keyboardSize.height - offset.height
-//            })
-//        }
-//        print(self.view.frame.origin.y)
+  
     }
     
     func keyboardWillHide(sender: NSNotification) {
@@ -497,10 +491,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
         
         // remove gesture oberserver
         view.removeGestureRecognizer(tapGesture)
-        
-//        let userInfo = sender.userInfo!
-//        let keyboardSize: CGSize = (userInfo[UIKeyboardFrameBeginUserInfoKey]! as AnyObject).cgRectValue.size
-//        self.view.frame.origin.y += keyboardSize.height
+
     }
     
     
@@ -509,14 +500,18 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
             guard let text = textField.text else { return true }
             let newLength = text.characters.count + string.characters.count - range.length
             if newLength > 2 {
-                buttonShare.isEnabled = true
-                buttonShare.applyGradient(colours: [UIColor.init(red: 216/255, green: 101/255, blue: 255/255, alpha: 1.0), UIColor.init(red: 86/255, green: 151/255, blue: 255/255, alpha: 1.0)])
+                enableButtonShare()
             } else {
                 buttonShare.backgroundColor = UIColor.lightGray
             }
             return newLength <= self.goalLength.intValue // Bool
         }
         return true
+    }
+    
+    func enableButtonShare() {
+        buttonShare.isEnabled = true
+        buttonShare.applyGradient(colours: [UIColor.init(red: 216/255, green: 101/255, blue: 255/255, alpha: 1.0), UIColor.init(red: 86/255, green: 151/255, blue: 255/255, alpha: 1.0)])
     }
     
     

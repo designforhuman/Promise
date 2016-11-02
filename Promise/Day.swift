@@ -25,7 +25,7 @@ class Day: NSObject, NSCoding {
     }
     
     func encode(with aCoder: NSCoder) {
-        
+        aCoder.encode(emojiName, forKey: "EmojiName")
     }
     
     

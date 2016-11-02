@@ -21,14 +21,36 @@ class Promise: NSObject, NSCoding {
     var shouldRemind = false
     var date = Date()
     var days = [Day]()
-    var itemID = 0
     var supporters = [Supporter]()
-    
+    var itemID: Int = 0
     
     
     required init?(coder aDecoder: NSCoder) {
         goal = aDecoder.decodeObject(forKey: "Goal") as! String
+        interval = aDecoder.decodeObject(forKey: "Interval") as! [Bool]
+        duration = aDecoder.decodeInteger(forKey: "Duration")
+        rewardPrefix = aDecoder.decodeObject(forKey: "RewardPrefix") as! String
+        reward = aDecoder.decodeObject(forKey: "Reward") as! String
+        shouldRemind = aDecoder.decodeBool(forKey: "ShouldRemind")
+        date = aDecoder.decodeObject(forKey: "Date") as! Date
+        days = aDecoder.decodeObject(forKey: "Days") as! [Day]
+        supporters = aDecoder.decodeObject(forKey: "Supporters") as! [Supporter]
+        itemID = aDecoder.decodeInteger(forKey: "ItemID")
+        
         super.init()
+    }
+    
+    func encode(with aCoder: NSCoder) {
+        aCoder.encode(goal, forKey: "Goal")
+        aCoder.encode(interval, forKey: "Interval")
+        aCoder.encode(duration, forKey: "Duration")
+        aCoder.encode(rewardPrefix, forKey: "RewardPrefix")
+        aCoder.encode(reward, forKey: "Reward")
+        aCoder.encode(shouldRemind, forKey: "ShouldRemind")
+        aCoder.encode(date, forKey: "Date")
+        aCoder.encode(days, forKey: "Days")
+        aCoder.encode(supporters, forKey: "Supporters")
+        aCoder.encode(itemID, forKey: "ItemID")
     }
     
     override init() {
@@ -43,10 +65,6 @@ class Promise: NSObject, NSCoding {
         removeNotification()
     }
     
-    
-    func encode(with aCoder: NSCoder) {
-        aCoder.encode(goal, forKey: "Goal")
-    }
     
     
     func makeInitialDays() {
