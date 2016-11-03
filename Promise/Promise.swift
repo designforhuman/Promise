@@ -13,6 +13,7 @@ import UserNotifications
 
 class Promise: NSObject, NSCoding {
     
+    var isMade = false
     var goal = ""
     var interval = [true, true, true, true, true, true, true]
     var duration: Int = 4
@@ -22,10 +23,12 @@ class Promise: NSObject, NSCoding {
     var date = Date()
     var days = [Day]()
     var supporters = [Supporter]()
+    var competitors = [Competitor]()
     var itemID: Int = 0
     
     
     required init?(coder aDecoder: NSCoder) {
+        isMade = aDecoder.decodeBool(forKey: "IsMade")
         goal = aDecoder.decodeObject(forKey: "Goal") as! String
         interval = aDecoder.decodeObject(forKey: "Interval") as! [Bool]
         duration = aDecoder.decodeInteger(forKey: "Duration")
@@ -35,12 +38,14 @@ class Promise: NSObject, NSCoding {
         date = aDecoder.decodeObject(forKey: "Date") as! Date
         days = aDecoder.decodeObject(forKey: "Days") as! [Day]
         supporters = aDecoder.decodeObject(forKey: "Supporters") as! [Supporter]
+        competitors = aDecoder.decodeObject(forKey: "Competitors") as! [Competitor]
         itemID = aDecoder.decodeInteger(forKey: "ItemID")
         
         super.init()
     }
     
     func encode(with aCoder: NSCoder) {
+        aCoder.encode(isMade, forKey: "IsMade")
         aCoder.encode(goal, forKey: "Goal")
         aCoder.encode(interval, forKey: "Interval")
         aCoder.encode(duration, forKey: "Duration")
@@ -50,6 +55,7 @@ class Promise: NSObject, NSCoding {
         aCoder.encode(date, forKey: "Date")
         aCoder.encode(days, forKey: "Days")
         aCoder.encode(supporters, forKey: "Supporters")
+        aCoder.encode(competitors, forKey: "Competitors")
         aCoder.encode(itemID, forKey: "ItemID")
     }
     

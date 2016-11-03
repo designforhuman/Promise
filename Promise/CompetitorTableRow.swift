@@ -1,30 +1,36 @@
 //
-//  SupporterNoTableRow.swift
+//  CompetitorTableRow.swift
 //  Promise
 //
-//  Created by LeeDavid on 10/26/16.
+//  Created by LeeDavid on 11/3/16.
 //  Copyright © 2016 Daylight. All rights reserved.
 //
 
 import UIKit
 
-
-
-
-class SupporterNoTableRow: UITableViewCell, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class CompetitorTableRow: UITableViewCell, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     
     var promise: Promise!
-    var supporterNames = [String]()
-    var supporterPhotoUrls = [String]()
+    var competitorNames = [String]()
+    var competitorPhotoUrls = [String]()
+    
     
     fileprivate let sectionInsets = UIEdgeInsets(top: 0.0, left: 12.0, bottom: 0.0, right: 12.0)
     
     @IBOutlet weak var collectionView: UICollectionView!
-
     
 
-    
+//    override func awakeFromNib() {
+//        super.awakeFromNib()
+//        // Initialization code
+//    }
+//
+//    override func setSelected(_ selected: Bool, animated: Bool) {
+//        super.setSelected(selected, animated: animated)
+//
+//        // Configure the view for the selected state
+//    }
     
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -32,12 +38,11 @@ class SupporterNoTableRow: UITableViewCell, UICollectionViewDataSource, UICollec
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        
-        return supporterNames.count
+        print("COMPETITORCOUNT: \(competitorNames.count)")
+        return competitorNames.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SupporterCell", for: indexPath) as! SupporterCell
         
         cell.userImage.backgroundColor = UIColor.lightGray
@@ -46,10 +51,10 @@ class SupporterNoTableRow: UITableViewCell, UICollectionViewDataSource, UICollec
         cell.userImage.layer.cornerRadius = 25
         
         // load name
-        cell.userName.text = supporterNames[indexPath.row]
+        cell.userName.text = competitorNames[indexPath.row]
         
         // load photo
-        let url = URL(string: supporterPhotoUrls[indexPath.row])
+        let url = URL(string: competitorPhotoUrls[indexPath.row])
         DispatchQueue.global().async {
             //make sure your image in this url does exist, otherwise unwrap in a if let check / try-catch
             if let data = try? Data(contentsOf: url!) {
@@ -61,10 +66,14 @@ class SupporterNoTableRow: UITableViewCell, UICollectionViewDataSource, UICollec
             }
         }
         
-        
         return cell
     }
     
+//    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+//        
+//    }
+    
+    /////
     
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -85,5 +94,15 @@ class SupporterNoTableRow: UITableViewCell, UICollectionViewDataSource, UICollec
         return 0
     }
     
-    
+
 }
+
+
+
+
+
+
+
+
+
+

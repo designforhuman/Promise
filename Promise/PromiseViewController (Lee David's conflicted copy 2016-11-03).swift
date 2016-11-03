@@ -437,8 +437,6 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
         comm.ref.child("users/\(uid!)/promise0/competitors").observeSingleEvent(of: .value, with: { (snapshot) in
             // Get user value
             var competitors = [NSDictionary]()
-            print("SNAPSHOT: \(snapshot)")
-            print("SNAPSHOT_CHILDREN: \(snapshot.children)")
             
             for item in snapshot.children {
                 let child = item as! FIRDataSnapshot
@@ -448,15 +446,15 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
             
             for dict in competitors {
                 var competitor = dict as! [String: String]
-                let userName = competitor["name"]!
-                let userPhoto = competitor["photoUrl"]!
+                let userName = competitor["userName"]!
+                let userPhoto = competitor["userPhoto"]!
                 competitorCell.competitorNames.append(userName)
                 competitorCell.competitorPhotoUrls.append(userPhoto)
 
                 self.dataModel.lists[self.promiseNum].competitors.append(Competitor(name: userName, photoUrl: userPhoto))
             }
             
-            competitorCell.collectionView.reloadData()
+//            supporterYesCell.collectionView.reloadData()
             
         }) { (error) in
             print(error.localizedDescription)
@@ -492,8 +490,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
                 self.dataModel.lists[self.promiseNum].supporters.append(Supporter(name: userName, photoUrl: userPhoto, reaction: supporter["reaction"]!))
             }
           
-            supporterYesCell.collectionView.reloadData()
-            supporterNoCell.collectionView.reloadData()
+            competitorCell.collectionView.reloadData()
             
         }) { (error) in
             print(error.localizedDescription)
@@ -705,50 +702,6 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
             
         } else {
             print("post canceled")
-            
-            // data
-            dataModel.lists[promiseNum].isMade = true
-            
-            // if the user logged-in, download and show data
-            helper.showCell("S0R3")
-            helper.showCell("S0R4")
-            
-            let competitorIndexPath = helper.indexPathForCellNamed("S0R2")
-            let competitorCell = helper.cellForRowAtIndexPath(competitorIndexPath!) as! CompetitorTableRow
-            competitorCell.promise = self.dataModel.lists[promiseNum]
-            
-            let supporterYesIndexPath = helper.indexPathForCellNamed("S0R3")
-            let supporterYesCell = helper.cellForRowAtIndexPath(supporterYesIndexPath!) as! SupporterYesTableRow
-            supporterYesCell.promise = self.dataModel.lists[promiseNum]
-
-            let supporterNoIndexPath = helper.indexPathForCellNamed("S0R4")
-            let supporterNoCell = helper.cellForRowAtIndexPath(supporterNoIndexPath!) as! SupporterNoTableRow
-            supporterNoCell.promise = self.dataModel.lists[promiseNum]
-            
-            updateUserData()
-            
-            
-            // UI
-            buttonShare.isHidden = true
-            
-            buttonCheckIn = UIButton()
-            buttonCheckIn.setTitle("Check-In", for: .normal)
-            if #available(iOS 8.2, *) {
-                buttonCheckIn.titleLabel?.font = UIFont.systemFont(ofSize: 22, weight: UIFontWeightRegular)
-            } else {
-                // Fallback on earlier versions
-            }
-            buttonCheckIn.setTitleColor(UIColor.white, for: .normal)
-            buttonCheckIn.setTitleColor(UIColor.init(red: 1, green: 1, blue: 1, alpha: 0.5), for: .highlighted)
-            buttonCheckIn.frame = CGRect(x: 0, y: self.view.frame.height - 70, width: self.view.frame.width, height: 70)
-            buttonCheckIn.backgroundColor = UIColor.yellow
-            buttonCheckIn.addTarget(self, action: #selector(self.checkIn), for: .touchUpInside)
-            self.view.addSubview(buttonCheckIn)
-            buttonCheckIn.applyGradient(colours: [UIColor.init(red: 255/255, green: 205/255, blue: 44/255, alpha: 1.0), UIColor.init(red: 255/255, green: 142/255, blue: 44/255, alpha: 1.0)])
-            
-            
-            handleCompletion(uid!, data)
-            
         }
     }
     

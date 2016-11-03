@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		540980CB1DC0943100FD5899 /* Supporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540980CA1DC0943100FD5899 /* Supporter.swift */; };
+		543BDE6E1DCB00D300460083 /* CompetitorTableRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 543BDE6D1DCB00D300460083 /* CompetitorTableRow.swift */; };
+		543BDE701DCB222000460083 /* Competitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 543BDE6F1DCB222000460083 /* Competitor.swift */; };
 		54423F5A1DC882B000ECCB10 /* DataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54423F591DC882B000ECCB10 /* DataModel.swift */; };
 		545219491DBF6A5C003DF86F /* Day.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545219481DBF6A5C003DF86F /* Day.swift */; };
 		5474D50C1DBE2182009194C0 /* DayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5474D50B1DBE2182009194C0 /* DayCell.swift */; };
@@ -39,6 +41,8 @@
 		049F36838BD185C84C909FDB /* Pods_Promise.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Promise.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		540980CA1DC0943100FD5899 /* Supporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Supporter.swift; sourceTree = "<group>"; };
 		54100991920F48D3BF4049BE /* Pods-Promise.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Promise.release.xcconfig"; path = "Pods/Target Support Files/Pods-Promise/Pods-Promise.release.xcconfig"; sourceTree = "<group>"; };
+		543BDE6D1DCB00D300460083 /* CompetitorTableRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorTableRow.swift; sourceTree = "<group>"; };
+		543BDE6F1DCB222000460083 /* Competitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Competitor.swift; sourceTree = "<group>"; };
 		54423F591DC882B000ECCB10 /* DataModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataModel.swift; sourceTree = "<group>"; };
 		545219481DBF6A5C003DF86F /* Day.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Day.swift; sourceTree = "<group>"; };
 		5474D50B1DBE2182009194C0 /* DayCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayCell.swift; sourceTree = "<group>"; };
@@ -115,6 +119,7 @@
 				54423F591DC882B000ECCB10 /* DataModel.swift */,
 				54887C721DB7571B00B45497 /* Promise.swift */,
 				545219481DBF6A5C003DF86F /* Day.swift */,
+				543BDE6F1DCB222000460083 /* Competitor.swift */,
 				540980CA1DC0943100FD5899 /* Supporter.swift */,
 				54887C6D1DB7571B00B45497 /* AppState.swift */,
 				54887C6E1DB7571B00B45497 /* Constants.swift */,
@@ -181,6 +186,7 @@
 			children = (
 				5474D50D1DBE23D3009194C0 /* DayTableRow.swift */,
 				5474D50B1DBE2182009194C0 /* DayCell.swift */,
+				543BDE6D1DCB00D300460083 /* CompetitorTableRow.swift */,
 				54BF3FB51DC068FF005E8D9E /* SupporterYesTableRow.swift */,
 				54BAC7001DC0C5030089A84A /* SupporterNoTableRow.swift */,
 				54BF3FB91DC06B40005E8D9E /* SupporterCell.swift */,
@@ -324,8 +330,10 @@
 				54BAC7011DC0C5030089A84A /* SupporterNoTableRow.swift in Sources */,
 				54887C7C1DB7571B00B45497 /* PromiseViewController.swift in Sources */,
 				54AF120E1DB78E87005D5EAC /* DurationViewController.swift in Sources */,
+				543BDE6E1DCB00D300460083 /* CompetitorTableRow.swift in Sources */,
 				5474D50E1DBE23D3009194C0 /* DayTableRow.swift in Sources */,
 				54887C7E1DB7571B00B45497 /* TableViewHelper.swift in Sources */,
+				543BDE701DCB222000460083 /* Competitor.swift in Sources */,
 				54887C7D1DB7571B00B45497 /* SignInViewController.swift in Sources */,
 				54423F5A1DC882B000ECCB10 /* DataModel.swift in Sources */,
 				54887C761DB7571B00B45497 /* AppState.swift in Sources */,
