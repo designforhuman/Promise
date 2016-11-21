@@ -23,14 +23,10 @@ class SupporterYesTableRow: UITableViewCell, UICollectionViewDataSource, UIColle
     
     @IBOutlet weak var collectionView: UICollectionView!
     
-    
- 
 //    override func layoutSubviews() {
 //        super.layoutSubviews()
 //        
 //    }
-    
-
 
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1

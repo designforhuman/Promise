@@ -7,8 +7,60 @@
 //
 
 import UIKit
+import FirebaseAuth
+
+
 
 class EmailSignInViewController: UIViewController {
+    
+    
+    @IBOutlet weak var emailField: UITextField!
+    @IBOutlet weak var passwordField: UITextField!
+//
+//    
+//    
+//    @IBAction func didTapSignIn(_ sender: AnyObject) {
+//        // Sign In with credentials.
+//        guard let email = emailField.text, let password = passwordField.text else { return }
+//        FIRAuth.auth()?.signIn(withEmail: email, password: password) { (user, error) in
+//            if let error = error {
+//                print(error.localizedDescription)
+//                return
+//            }
+//            self.signedIn(user!)
+//        }
+//    }
+//    
+//    @IBAction func didTapSignUp(_ sender: AnyObject) {
+//        guard let email = emailField.text, let password = passwordField.text else { return }
+//        FIRAuth.auth()?.createUser(withEmail: email, password: password) { (user, error) in
+//            if let error = error {
+//                print(error.localizedDescription)
+//                return
+//            }
+//            self.setDisplayName(user!)
+//        }
+//    }
+    
+    @IBAction func didRequestPasswordReset(_ sender: AnyObject) {
+        let prompt = UIAlertController.init(title: nil, message: "Email:", preferredStyle: .alert)
+        let okAction = UIAlertAction.init(title: "OK", style: .default) { (action) in
+            let userInput = prompt.textFields![0].text
+            if (userInput!.isEmpty) {
+                return
+            }
+            FIRAuth.auth()?.sendPasswordReset(withEmail: userInput!) { (error) in
+                if let error = error {
+                    print(error.localizedDescription)
+                    return
+                }
+            }
+        }
+        prompt.addTextField(configurationHandler: nil)
+        prompt.addAction(okAction)
+        present(prompt, animated: true, completion: nil);
+    }
+    
     
     
     @IBAction func cancel(_ sender: Any) {
@@ -16,6 +68,15 @@ class EmailSignInViewController: UIViewController {
     }
     
     
+    @IBAction func done(_ sender: Any) {
+        
+    }
+    
+    
+    
+    override var prefersStatusBarHidden: Bool {
+        return true
+    }
     
 
     override func viewDidLoad() {

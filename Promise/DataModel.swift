@@ -13,7 +13,7 @@ import Foundation
 class DataModel {
     
     var lists = [Promise]()
-    
+    var promiseNum = 0
     
     init() {
         loadLists()
@@ -56,9 +56,7 @@ class DataModel {
     
     
     func registerDefaults() {
-        let dictionary: [String: Any] = [ "FirstTime": true,
-                                          "ChecklistItemID": 0 ]
-        
+        let dictionary: [String: Any] = ["FirstTime": true, "reminderID": 0]
         UserDefaults.standard.register(defaults: dictionary)
     }
     
@@ -77,12 +75,12 @@ class DataModel {
     }
     
     
-    class func nextItemID() -> Int {
+    class func nextReminderID() -> Int {
         let userDefaults = UserDefaults.standard
-        let itemID = userDefaults.integer(forKey: "ChecklistItemID")
-        userDefaults.set(itemID + 1, forKey: "ChecklistItemID")
+        let itemID = userDefaults.integer(forKey: "reminderID")
+        userDefaults.set(itemID + 1, forKey: "reminderID")
         userDefaults.synchronize()
-        print("ITEMIDIDID: \(itemID)")
+        print("NEXTITEMID: \(itemID)")
         return itemID
     }
     

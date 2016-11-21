@@ -12,7 +12,7 @@ import UIKit
 
 protocol DurationViewControllerDelegate: class {
     func durationViewController(_ controller: DurationViewController,
-                                didFinishSelect duration: Int)
+                                didFinishSelect duration: Int, durationToDisplay: String)
 }
 
 
@@ -21,7 +21,21 @@ class DurationViewController: UITableViewController {
     
     weak var delegate: DurationViewControllerDelegate?
     let weeks = ["1 Week", "2 Weeks", "3 Weeks", "4 Weeks"]
-    var selectedWeeks: Int!
+    var selectedWeek: Int!
+    var durationToDisplay: String!
+    var durationSuffix = "s"
+    
+    
+    @IBAction func cancel(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    @IBAction func done(_ sender: Any) {
+        delegate?.durationViewController(self, didFinishSelect: selectedWeek, durationToDisplay: "")
+        dismiss(animated: true, completion: nil)
+    }
+    
+    
     
 
     override func viewDidLoad() {
@@ -31,10 +45,11 @@ class DurationViewController: UITableViewController {
 
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(true)
-        delegate?.durationViewController(self, didFinishSelect: selectedWeeks)
-    }
+//    override func viewWillDisappear(_ animated: Bool) {
+//        super.viewWillDisappear(true)
+//        
+//        delegate?.durationViewController(self, didFinishSelect: selectedWeek, durationToDisplay: "")
+//    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -53,22 +68,27 @@ class DurationViewController: UITableViewController {
         return weeks.count
     }
     
+    
+    
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        selectedWeeks = indexPath.row + 1
-        tableView.reloadData()
-        navigationController?.popViewController(animated: true)
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        selectedWeek = indexPath.row + 1
+        tableView.reloadData()
+//        navigationController?.popViewController(animated: true)
     }
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "DurationItem", for: indexPath)
+        cell.selectionStyle = .none
 
         let label = cell.contentView.subviews[0] as! UILabel
         label.text = weeks[indexPath.row]
         
-        if selectedWeeks == indexPath.row + 1 {
+        if selectedWeek == indexPath.row + 1 {
             label.textColor = UIColor.black
             if #available(iOS 8.2, *) {
                 label.font = UIFont.systemFont(ofSize: 22, weight: UIFontWeightMedium)

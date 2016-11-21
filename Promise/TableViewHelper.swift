@@ -14,6 +14,7 @@ public struct TableViewHelper {
     
 	public init(tableView:UITableView) {
         self.tableView = tableView
+//        self.tableView.tableFooterView = UIView(frame: CGRect.zero)
     }
     
 	public mutating func addCell(_ section:Int, cell:UITableViewCell, name:String) {
@@ -22,7 +23,7 @@ public struct TableViewHelper {
         var indexPath:IndexPath
         
         if let count = cellCount[section] {
-            cellCount[section] = count+1
+            cellCount[section] = count + 1
             indexPath = IndexPath(row: count, section: section)
         } else {
             cellCount[section] = 1
@@ -91,8 +92,9 @@ public struct TableViewHelper {
         if initialCount == numberOfSections() {
             tableView.insertRows(at: addPaths, with: .top)
 //            print("TOPTOP: \(tableView.contentOffset.y)")
-            if tableView.contentOffset.y > 60 {
-                tableView.setContentOffset(CGPoint.init(x: 0, y: 216+64), animated: true) // 64 is the height of nav bar
+            if tableView.contentOffset.y > -65 {
+//                print("HEIGHT_ADJUST: \(tableView.contentOffset.y - 217 - 70)")
+                tableView.setContentOffset(CGPoint.init(x: 0, y: tableView.contentOffset.y + 217 + 70), animated: true) // 217 is the height of picker view
             }
         } else {
             tableView.reloadData()
@@ -161,7 +163,7 @@ public struct TableViewHelper {
         var count = 0
         
         for section in cellCount.keys {
-            if cellCount[section]! > 0 {
+            if cellCount[section]! > 1 {
                 count += 1
             }
         }

@@ -12,94 +12,123 @@ import Firebase
 import UserNotifications
 
 
-class PromiseViewController: UIViewController, UITableViewDataSource,UITableViewDelegate, UITextFieldDelegate, IntervalViewControllerDelegate, DurationViewControllerDelegate, FBSDKSharingDelegate, CheckInViewControllerDelegate {
+class PromiseViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate, FBSDKSharingDelegate {
     
-    let promiseNum = 0
+//    let promiseNum: Int!
     
-    let comm = FCViewController()
+    var comm: FCViewController!
+    let uid = AppState.sharedInstance.uid //"JWEFfYj52fVT4uCH3MUk6jgnSsK2"
+    
     var helper: TableViewHelper!
     var dataModel: DataModel!
-//    var promise = Promise()
     var intervalToDisplay = "Everyday"
-    var durationSuffix = "s"
     var durationToDisplay = "4 Weeks"
     let goalLength: NSNumber = 13
+    let minGoalTextLength = 2
     var data = [String: String]()
-    let uid = AppState.sharedInstance.uid //"JWEFfYj52fVT4uCH3MUk6jgnSsK2"
     var textFieldGoal: UITextField?
     var tapGesture: UITapGestureRecognizer!
-    var buttonCheckIn: UIButton!
-    var blurView: UIView?
-    var date = Date()
-    var dateLabel: UILabel?
+    var isKeyboardUp = false
+    var today = Date()
+    var startDate = Date()
+    var startDateString = ""
+    var endDate = Date()
+    var endDateString = ""
+    var reminderLabel: UILabel!
     var reminderSwitch: UISwitch!
+    var remindDate = Date()
     
     
     @IBOutlet weak var buttonShare: UIButton!
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var buttonShadow: UIImageView!
     
     
     @IBAction func rewardToggle(_ rewardToggle: UIButton) {
         if rewardToggle.isTouchInside {
 //            print("TOUCHTOUCH: \(rewardToggle.titleLabel!.text!)")
-            let label = (rewardToggle.titleLabel!.text! == "I'll do this to those who join me if I succeed.") ? "I'll do this to those who join me if I fail." : "I'll do this to those who join me if I succeed."
+            let label = (rewardToggle.titleLabel!.text! == "If I succeed, I will") ? "If I fail, I will" : "If I succeed, I will"
             rewardToggle.setTitle(label, for: .normal)
-            dataModel.lists[promiseNum].rewardPrefix = label
+            dataModel.lists[dataModel.promiseNum].rewardPrefix = label
         }
     }
     
-    @IBAction func reminder(_ switchControl: UISwitch) {
-        if !helper.cellIsVisible("S0R8") && dateLabel?.text == "Reminder" {
-            helper?.showCell("S0R8")
-        } else {
-            helper?.hideCell("S0R8")
-        }
-        
-        if switchControl.isOn {
-            if #available(iOS 10.0, *) {
-                let center = UNUserNotificationCenter.current()
-                center.requestAuthorization(options: [.alert, .sound, .badge]) {
-                    granted, error in /* do nothing */
-                }
-            } else {
-                // Fallback on earlier versions
-            }
-            
-            dataModel.lists[promiseNum].shouldRemind = true
-            
-            if dateLabel?.text == "Reminder" {
-                updateDueDateLabel()
-            }
-            
-        } else {
-            dataModel.lists[promiseNum].shouldRemind = false
-        }
-    }
     
-    @IBAction func dateChanged(_ datePicker: UIDatePicker) {
-        date = datePicker.date
-        updateDueDateLabel()
-        
-        // set reminder
-        if dataModel.lists[promiseNum].shouldRemind {
-            dataModel.lists[promiseNum].scheduleNotification()
+    @IBAction func startDateChanged(_ datePicker: UIDatePicker) {
+        self.startDate = datePicker.date
+        var todayIndicator = ""
+        let calendar = Calendar.current
+        if calendar.isDateInToday(datePicker.date) {
+            todayIndicator = " (Today)"
         }
-    }
-    
-    func updateDueDateLabel() {
         let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-        dateLabel?.text = "Reminder \(formatter.string(from: date))"
-        dataModel.lists[promiseNum].date = date
+        formatter.dateStyle = .medium
+        formatter.locale = Locale.autoupdatingCurrent
+        self.startDateString = formatter.string(from: self.startDate) + todayIndicator
+        
+//        let duration = " (\(calcDayDifference()) Days)"
+//        self.endDateString = formatter.string(from: self.endDate) + duration
+        
+        updateStartEndDates()
+        
+        tableView.reloadData()
     }
+    
+    @IBAction func endDateChanged(_ datePicker: UIDatePicker) {
+        self.endDate = datePicker.date
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.locale = Locale.autoupdatingCurrent
+//        let duration = " (\(calcDayDifference()) Days)"
+        self.endDateString = formatter.string(from: self.endDate)
+        formatter.locale = Locale.current
+        
+        updateStartEndDates()
+        
+        tableView.reloadData()
+    }
+    
+    
+    @IBAction func reminderSwitchChanged(_ switchControl: UISwitch) {
+        if !helper.cellIsVisible("ReminderPicker") && reminderLabel?.text == "Reminder" {
+            helper?.showCell("ReminderPicker")
+        } else {
+            helper?.hideCell("ReminderPicker")
+        }
+        
+        // set notification
+        if switchControl.isOn {
+            let center = UNUserNotificationCenter.current()
+            center.requestAuthorization(options: [.alert, .sound, .badge]) {
+                granted, error in /* do nothing */
+            }
+            
+            // data
+            updateReminder()
+            dataModel.lists[dataModel.promiseNum].shouldRemind = true
+            dataModel.lists[dataModel.promiseNum].scheduleNotification()
+            
+        } else {
+            dataModel.lists[dataModel.promiseNum].shouldRemind = false
+            dataModel.lists[dataModel.promiseNum].removeNotification()
+        }
+
+    }
+    
+    
+    @IBAction func reminderDateChanged(_ datePicker: UIDatePicker) {
+        remindDate = datePicker.date
+        updateReminder()
+        let currentPromise = dataModel.lists[dataModel.promiseNum]
+        if currentPromise.shouldRemind {
+            currentPromise.scheduleNotification()
+        }
+    }
+    
     
     
     
     @IBAction func showShareActionSheet(_ sender: AnyObject) {
-        
-        // remove gesture oberserver
-        view.removeGestureRecognizer(tapGesture)
         
         let optionMenu = UIAlertController(title: "Share to Confirm", message: "Be sure to share your Promise to others to get motivated!", preferredStyle: .actionSheet)
         
@@ -113,7 +142,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
 //            shareDialog.fromViewController = self
             shareDialog.shareContent = content
             shareDialog.delegate = self
-//            dialog.mode = FBSDKShareDialogMode.automatic
+            shareDialog.mode = FBSDKShareDialogMode.browser
             shareDialog.show()
         })
         
@@ -123,15 +152,13 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
             let shareDialog = FBSDKMessageDialog()
             shareDialog.shareContent = content
             shareDialog.delegate = self
-            //            dialog.mode = FBSDKShareDialogMode.automatic
+//            dialog.mode = FBSDKShareDialogMode.automatic
             shareDialog.show()
         })
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: {
             (alert: UIAlertAction!) -> Void in
 //            print("ACTION CANCELLED")
-            // add gesture oberserver1
-            self.view.addGestureRecognizer(self.tapGesture)
         })
         
         optionMenu.addAction(deleteAction)
@@ -144,18 +171,13 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     
     
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(true)
-    }
-    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
         tableView.reloadData()
-        
     }
     
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -163,13 +185,18 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
         comm.configureDatabase()
         
         // set initial status
-        buttonShare.isEnabled = false
-        dateLabel?.text = "Reminder"
+        disableButtonShare()
         
         // set initial data
-        print("DATAMODEL: \(dataModel)")
-        print("LISTS: \(dataModel.lists)")
-        dataModel.lists[promiseNum].makeInitialDays()
+        print("DATAMODEL2: \(dataModel)")
+        print("LISTS2: \(dataModel.lists)")
+        setInitialDates()
+        
+//        print("PROMISENUM1: \(self.dataModel.lists.count)")
+        
+        // style
+        buttonShare.layer.cornerRadius = 2
+        tableView.contentInset = UIEdgeInsetsMake(0, 0, 100, 0)
         
         // keyboard observer
         tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
@@ -178,32 +205,33 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
 
         
-        helper = TableViewHelper(tableView: tableView)
-        
         // bottom table view: clear lines
 //        helper.tableView.tableHeaderView = UIView(frame: CGRect.zero)
-//        helper.tableView.tableFooterView = UIView(frame: CGRect.zero)
+//        tableView.tableFooterView = UIView(frame: CGRect.zero)
         
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R0")! as UITableViewCell, name: "S0R0")
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R1")! as! DayTableRow, name: "S0R1")
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R2")! as! CompetitorTableRow, name: "S0R2")
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R3")! as! SupporterYesTableRow, name: "S0R3")
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R4")! as! SupporterNoTableRow, name: "S0R4")
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R5")! as UITableViewCell, name: "S0R5")
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R6")! as UITableViewCell, name: "S0R6")
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R7")! as UITableViewCell, name: "S0R7")
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R8")! as UITableViewCell, name: "S0R8")
-        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "S0R9")! as UITableViewCell, name: "S0R9")
+        helper = TableViewHelper(tableView: tableView)
         
-        helper?.hideCell("S0R3")
-        helper?.hideCell("S0R4")
-        helper?.hideCell("S0R9")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "Goal")! as UITableViewCell, name: "Goal")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "Reward")! as UITableViewCell, name: "Reward")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "StartDate")! as UITableViewCell, name: "StartDate")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "StartDatePicker")! as UITableViewCell, name: "StartDatePicker")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "EndDate")! as UITableViewCell, name: "EndDate")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "EndDatePicker")! as UITableViewCell, name: "EndDatePicker")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "Interval")! as UITableViewCell, name: "Interval")
+//        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "Duration")! as UITableViewCell, name: "Duration")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "Reminder")! as UITableViewCell, name: "Reminder")
+        helper.addCell(0, cell: tableView.dequeueReusableCell(withIdentifier: "ReminderPicker")! as UITableViewCell, name: "ReminderPicker")
+        
+//        helper?.hideCell("Duration") // permanent?
+        helper?.hideCell("StartDatePicker")
+        helper?.hideCell("EndDatePicker")
+        helper?.hideCell("ReminderPicker")
         
         
         // set data
-        let dayIndexPath = helper.indexPathForCellNamed("S0R1")
-        let dayCell = helper.cellForRowAtIndexPath(dayIndexPath!) as! DayTableRow
-        dayCell.promise = self.dataModel.lists[promiseNum]
+//        let dayIndexPath = helper.indexPathForCellNamed("S0R1")
+//        let dayCell = helper.cellForRowAtIndexPath(dayIndexPath!) as! DayTableRow
+//        dayCell.promise = self.dataModel.lists[promiseNum]
         
         
         // if the user logged-in, download and show data
@@ -220,9 +248,6 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     
     
     
-    
-    
-    
     func viewWillDisappear(animated: Bool) {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         NotificationCenter.default.removeObserver(self,  name: NSNotification.Name.UIKeyboardWillHide, object: nil)
@@ -232,6 +257,53 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
+    
+    
+    func setInitialDates() {
+        // start date
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.locale = Locale.autoupdatingCurrent
+        let convertedStartDate = formatter.string(from: self.startDate)
+        self.startDateString = "\(convertedStartDate) (Today)"
+        
+        // end date
+        let calendar = Calendar.current
+        let newEndDate = calendar.date(byAdding: .day, value: 30, to: self.endDate)
+        self.endDate = newEndDate!
+        let convertedEndDate = formatter.string(from: self.endDate)
+        self.endDateString = "\(convertedEndDate)"
+        
+        // data
+        updateStartEndDates()
+    }
+    
+    
+    func updateStartEndDates() {
+        dataModel.lists[dataModel.promiseNum].startDate = self.startDate
+        dataModel.lists[dataModel.promiseNum].endDate = self.endDate
+    }
+    
+    
+    func calcDayDifference() -> Int {
+        var calendar = Calendar.current
+        
+        // Replace the hour (time) of both dates with 00:00
+        let date1 = calendar.startOfDay(for: self.startDate)
+        let date2 = calendar.startOfDay(for: self.endDate)
+        
+        let unitFlags = Set<Calendar.Component>([.day])
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let components = calendar.dateComponents(unitFlags, from: date1, to: date2)
+        
+        // This will return the number of day(s) between dates
+        return components.day!
+    }
+    
+    
+    
+    
 
     // MARK: - Table view data source
 
@@ -246,100 +318,124 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
         return helper.numberOfRowsInSection(section)
     }
     
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        // remove the first separator and chage the color to black
-        let cell = helper.cellForRowAtIndexPath(indexPath)
-        let cellName = helper.cellNameAtIndexPath(indexPath)
-        if cellName == "S0R0" {
-            // UI
-            cell.separatorInset = UIEdgeInsetsMake(0, tableView.bounds.width/2.0, 0, tableView.bounds.width/2.0)
-            
-            let bottomBorder = CALayer()
-            bottomBorder.backgroundColor = UIColor.black.cgColor
-            bottomBorder.frame = CGRect(x: 20, y: cell.frame.height - 1, width: cell.frame.width - 40, height: 1)
-            cell.layer.addSublayer(bottomBorder)
-        }
-        
-    }
+//    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+//    }
 
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let cell = helper.cellForRowAtIndexPath(indexPath)
         let cellName = helper.cellNameAtIndexPath(indexPath)
-        
+
         // goal
-        if cellName == "S0R0" {
-            // Data
-            let goal = dataModel.lists[promiseNum].goal
+        if cellName == "Goal" {
+            let label = cell.viewWithTag(999) as! UILabel
+            label.adjustTextSpacing(-1.5)
+            
             let textField = cell.viewWithTag(1000) as! UITextField
-            textField.text = goal
-            if goal.characters.count > 2 {
+            textField.text = dataModel.lists[dataModel.promiseNum].goal
+            textField.adjustTextSpacing(-1.5)
+            if dataModel.lists[dataModel.promiseNum].goal.characters.count > minGoalTextLength {
                 enableButtonShare()
             }
         }
         
-        // interval
-        if cellName == "S0R5" {
+        if cellName == "Interval" {
             let label = cell.viewWithTag(1001) as! UILabel
-            label.text = intervalToDisplay
+            label.text = dataModel.lists[dataModel.promiseNum].intervalToDisplay
         }
         
-        // duration
-        if cellName == "S0R6" {
-            let label = cell.viewWithTag(1002) as! UILabel
-            durationSuffix = (dataModel.lists[promiseNum].duration == 1) ? "" : "s"
-            durationToDisplay = "\(dataModel.lists[promiseNum].duration) Week\(durationSuffix)"
-            label.text = durationToDisplay
+//        if cellName == "Duration" {
+//            let label = cell.viewWithTag(1002) as! UILabel
+//            label.text = durationToDisplay
+//        }
+        
+        if cellName == "StartDate" {
+            let label = cell.viewWithTag(1010) as! UILabel
+            label.text = startDateString
         }
         
-        // reward
-        if cellName == "S0R7" {
-            let button = cell.viewWithTag(1003) as! UIButton
-            button.setTitle(dataModel.lists[promiseNum].rewardPrefix, for: .normal)
-            
-            let textField = cell.viewWithTag(1004) as! UITextField
-            textField.text = dataModel.lists[promiseNum].reward
+        if cellName == "EndDate" {
+            let label = cell.viewWithTag(1020) as! UILabel
+            label.text = endDateString
         }
-
-        // text: reminder
-        if cellName == "S0R8" {
-            dateLabel = cell.viewWithTag(1005) as! UILabel
-            updateDueDateLabel()
+        
+        if cellName == "EndDatePicker" {
+            let picker = cell.viewWithTag(1030) as! UIDatePicker
+//            print("ENDDATE: \(self.endDate)")
+            picker.setDate(self.endDate, animated: false)
+        }
+        
+        if cellName == "Reminder" {
+            reminderLabel = cell.viewWithTag(1005) as! UILabel
+            if reminderLabel?.text != "Reminder" {
+                updateReminder()
+            }
             
-            reminderSwitch = cell.viewWithTag(1006) as! UISwitch
-            if dataModel.lists[promiseNum].shouldRemind {
-                reminderSwitch.setOn(true, animated: false)
+            reminderSwitch = cell.viewWithTag(10055) as! UISwitch
+            if dataModel.lists[dataModel.promiseNum].shouldRemind {
+                self.reminderSwitch.setOn(true, animated: false)
+                let formatter = DateFormatter()
+                formatter.dateStyle = .none
+                formatter.timeStyle = .short
+                reminderLabel?.text = "Reminder \(formatter.string(from: dataModel.lists[dataModel.promiseNum].remindDate))"
             }
         }
 
         return helper.cellForRowAtIndexPath(indexPath)
     }
+    
+    
+//    func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+//        
+//        let cell = helper.cellForRowAtIndexPath(indexPath)
+//        cell.selectionStyle = .none
+//        
+//        return nil
+//    }
  
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
         tableView.deselectRow(at: indexPath, animated: true)
         
         if let cellName = helper.cellNameAtIndexPath(indexPath) {
             switch cellName {
-            case "S0R8":
-                if !helper.cellIsVisible("S0R9") {
-                    helper?.showCell("S0R9")
-//                    tableView.frame.origin.y -= 216
+                
+            case "StartDate":
+                if !helper.cellIsVisible("StartDatePicker") {
+                    helper?.showCell("StartDatePicker")
                 } else {
-                    helper?.hideCell("S0R9")
-//                    tableView.layer.frame.origin.y += 216
-//                    tableView.contentOffset.y += 216
+                    helper?.hideCell("StartDatePicker")
+                }
+                
+            case "EndDate":
+                if !helper.cellIsVisible("EndDatePicker") {
+                    helper?.showCell("EndDatePicker")
+                } else {
+                    helper?.hideCell("EndDatePicker")
+                }
+                
+            case "Reminder":
+                if !helper.cellIsVisible("ReminderPicker") {
+                    helper?.showCell("ReminderPicker")
+                } else {
+                    helper?.hideCell("ReminderPicker")
                 }
                 
             default:
-                helper.hideCell("S0R9")
+                helper.hideCell("StartDatePicker")
+                helper.hideCell("EndDatePicker")
+                helper.hideCell("ReminderPicker")
             }
             
-            if cellName != "S0R8" {
-                helper?.hideCell("S0R9")
+            if cellName != "StartDate" {
+                helper?.hideCell("StartDatePicker")
+            } else if cellName != "EndDate" {
+                helper?.hideCell("EndDatePicker")
             }
         }
+        
     }
 
     
@@ -347,27 +443,15 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
         
         if let cellName = helper.cellNameAtIndexPath(indexPath) {
             switch cellName {
-                // goal
-                case "S0R0":
-                    return 132
+                case "Goal":
+                    return 136
+
+                case "Reward":
+                    return 114
                 
-                // checkin
-                case "S0R1":
-                    let cellHeight = (self.view.frame.width - 24) / 7 + 4 // temp
-                    return CGFloat(dataModel.lists[promiseNum].duration) * cellHeight + 20 // 20: top and bottom paddings
+                case "StartDatePicker", "EndDatePicker", "ReminderPicker":
+                    return 217
                 
-                // competitors & supporters
-                case "S0R2", "S0R3", "S0R4":
-                    return 150
-                
-                // reward
-                case "S0R7":
-                    return 100
-                
-                // picker view
-                case "S0R9":
-                    return 216
-                    
                 default:
                     return 74
             }
@@ -378,19 +462,29 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     
     
     
+    func updateReminder() {
+        dataModel.lists[dataModel.promiseNum].remindDate = remindDate
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        reminderLabel?.text = "Reminder \(formatter.string(from: remindDate))"
+//        print("REMINDER: \(remindDate)")
+    }
+    
+    
     func updateData() {
-        data = ["goal": dataModel.lists[promiseNum].goal,
+        data = ["goal": dataModel.lists[dataModel.promiseNum].goal,
                 "interval": intervalToDisplay,
                 "duration": durationToDisplay,
-                "reward": dataModel.lists[promiseNum].reward]
+                "reward": dataModel.lists[dataModel.promiseNum].reward]
     }
     
     func prepareContent(uid: String) -> FBSDKShareLinkContent {
         
         let content = FBSDKShareLinkContent()
         let urlPrefix = "https://promise-1432d.firebaseapp.com/?promiseId="
-        content.contentTitle = "I promise to \(dataModel.lists[promiseNum].goal). \(intervalToDisplay) for \(durationToDisplay.lowercased()). Do you think I can make it?"
-        content.contentDescription = "\(dataModel.lists[promiseNum].rewardPrefix) \(dataModel.lists[promiseNum].reward)"
+        content.contentTitle = "I promise to \(dataModel.lists[dataModel.promiseNum].goal). \(intervalToDisplay) for \(durationToDisplay.lowercased()). Do you think I can make it?"
+        content.contentDescription = "\(dataModel.lists[dataModel.promiseNum].rewardPrefix) \(dataModel.lists[dataModel.promiseNum].reward)"
         content.contentURL = URL(string: urlPrefix + uid)
         content.imageURL = URL(string: "https://promise-1432d.firebaseapp.com/static/images/defaultShare@2x.jpg")
         
@@ -401,14 +495,16 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     func handleCompletion(_ uid: String, _ data: Dictionary<String, String>) {
         // Write Data
         comm.ref.child("users/\(uid)").observeSingleEvent(of: .value, with: { (snapshot) in
-            let hasChild = snapshot.hasChild("promise0")
+            let hasChild = snapshot.hasChild("promise1")
             // print("HASCHILD: \(value)")
             if hasChild {
-                print("UPDATE PROMISE")
+//                print("UPDATE PROMISE")
+//                print("UID--: \(self.uid!)")
+//                print("COMM--: \(self.comm!)")
                 self.comm.ref.child("users/\(uid)/promise\(self.dataModel.lists.count)").updateChildValues(data)
             } else {
                 print("NEW PROMISE")
-                self.dataModel.lists.append(self.dataModel.lists[self.promiseNum])
+                self.dataModel.lists.append(self.dataModel.lists[self.dataModel.promiseNum])
                 print("LISTS: \(self.dataModel.lists)")
                 self.comm.ref.child("users/\(uid)/promise\(self.dataModel.lists.count)").setValue(data)
             }
@@ -422,99 +518,28 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     
     
     
-    func updateUserData() {
-        
-        let competitorIndexPath = self.helper.indexPathForCellNamed("S0R2")
-        let competitorCell = self.helper.cellForRowAtIndexPath(competitorIndexPath!) as! CompetitorTableRow
-        
-        let supporterYesIndexPath = self.helper.indexPathForCellNamed("S0R3")
-        let supporterYesCell = self.helper.cellForRowAtIndexPath(supporterYesIndexPath!) as! SupporterYesTableRow
-        
-        let supporterNoIndexPath = self.helper.indexPathForCellNamed("S0R4")
-        let supporterNoCell = self.helper.cellForRowAtIndexPath(supporterNoIndexPath!) as! SupporterNoTableRow
-        
-        // Competitors
-        comm.ref.child("users/\(uid!)/promise0/competitors").observeSingleEvent(of: .value, with: { (snapshot) in
-            // Get user value
-            var competitors = [NSDictionary]()
-            print("SNAPSHOT: \(snapshot)")
-            print("SNAPSHOT_CHILDREN: \(snapshot.children)")
-            
-            for item in snapshot.children {
-                let child = item as! FIRDataSnapshot
-                let dict = child.value as! NSDictionary
-                competitors.append(dict)
-            }
-            
-            for dict in competitors {
-                var competitor = dict as! [String: String]
-                let userName = competitor["name"]!
-                let userPhoto = competitor["photoUrl"]!
-                competitorCell.competitorNames.append(userName)
-                competitorCell.competitorPhotoUrls.append(userPhoto)
-
-                self.dataModel.lists[self.promiseNum].competitors.append(Competitor(name: userName, photoUrl: userPhoto))
-            }
-            
-            competitorCell.collectionView.reloadData()
-            
-        }) { (error) in
-            print(error.localizedDescription)
-        }
-        
-        
-        // Supporters
-        comm.ref.child("users/\(uid!)/promise0/users").observeSingleEvent(of: .value, with: { (snapshot) in
-            // Get user value
-//            let value = snapshot.value as? NSDictionary
-            var supporters = [NSDictionary]()
-            
-            for item in snapshot.children {
-                let child = item as! FIRDataSnapshot
-                let dict = child.value as! NSDictionary
-                supporters.append(dict)
-//                let reaction = supporters[0]["reaction"]
-//                print("TEMPITEMS: \(reaction)")
-            }
-            
-            for dict in supporters {
-                var supporter = dict as! [String: String]
-                let userName = supporter["userName"]!
-                let userPhoto = supporter["userPhoto"]!
-                if supporter["reaction"] == "yes" {
-                    supporterYesCell.supporterNames.append(userName)
-                    supporterYesCell.supporterPhotoUrls.append(userPhoto)
-                } else {
-                    supporterNoCell.supporterNames.append(userName)
-                    supporterNoCell.supporterPhotoUrls.append(userPhoto)
-                }
-                
-                self.dataModel.lists[self.promiseNum].supporters.append(Supporter(name: userName, photoUrl: userPhoto, reaction: supporter["reaction"]!))
-            }
-          
-            supporterYesCell.collectionView.reloadData()
-            supporterNoCell.collectionView.reloadData()
-            
-        }) { (error) in
-            print(error.localizedDescription)
-        }
-        
-    }
-    
-
-   
     func dismissKeyboard(){
         view.endEditing(true)
     }
     
+    
+    
     func keyboardWillShow(sender: NSNotification) {
         
-        let indexPath = helper.indexPathForCellNamed("S0R7")
+        let indexPath = helper.indexPathForCellNamed("Reward")
         let cell = helper.cellForRowAtIndexPath(indexPath!)
-        if let textField = cell.viewWithTag(1004) {
+        if let textField = cell.viewWithTag(10033) {
             if textField.isFirstResponder {
                 if let keyboardSize = (sender.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-                    tableView.frame.origin.y -= keyboardSize.height - buttonShare.frame.height
+                    let threshold = view.frame.height - keyboardSize.height // 451 on iPhone7
+//                    print("THRESHOLD: \(threshold)")
+                    let textPos = textField.superview?.convert(textField.frame, to: nil)
+                    let textPosY = (textPos?.origin.y)! + textField.frame.height
+//                    print("TEXTPOSY: \(textPosY)")
+                    if textPosY > threshold {
+                        isKeyboardUp = true
+                        tableView.frame.origin.y -= keyboardSize.height - buttonShare.frame.height
+                    }
                 }
             }
         }
@@ -524,9 +549,13 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
   
     }
     
+    
     func keyboardWillHide(sender: NSNotification) {
-        if let keyboardSize = (sender.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-            if tableView.frame.origin.y != 0 {
+        
+        if isKeyboardUp {
+            isKeyboardUp = false
+            
+            if let keyboardSize = (sender.userInfo?[UIKeyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
                 tableView.frame.origin.y += keyboardSize.height - buttonShare.frame.height
             }
         }
@@ -541,10 +570,10 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
         if textField.tag == 1000 {
             guard let text = textField.text else { return true }
             let newLength = text.characters.count + string.characters.count - range.length
-            if newLength > 2 {
+            if newLength > minGoalTextLength {
                 enableButtonShare()
             } else {
-                buttonShare.backgroundColor = UIColor.lightGray
+                disableButtonShare()
             }
             return newLength <= self.goalLength.intValue // Bool
         }
@@ -553,98 +582,45 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     
     func enableButtonShare() {
         buttonShare.isEnabled = true
-        buttonShare.applyGradient(colours: [UIColor.init(red: 216/255, green: 101/255, blue: 255/255, alpha: 1.0), UIColor.init(red: 86/255, green: 151/255, blue: 255/255, alpha: 1.0)])
+        buttonShare.backgroundColor = Constants.Colors.mainColor
+        buttonShadow.isHidden = false
+//        buttonShare.applyGradient(colors: [UIColor.init(red: 216/255, green: 101/255, blue: 255/255, alpha: 1.0), UIColor.init(red: 255/255, green: 142/255, blue: 19/255, alpha: 1.0)], direction: "horizontal")
     }
     
+    func disableButtonShare() {
+        buttonShare.isEnabled = false
+        buttonShare.backgroundColor = Constants.Colors.disabledColor
+        buttonShadow.isHidden = true
+    }
+
     
-//    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-//        return true
-//    }
-    
-    
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        
+    func saveTextFieldData(textField: UITextField) {
         let text = textField.text!.trimmingCharacters(in: CharacterSet.whitespaces)
         textField.resignFirstResponder()
-//        print("TEXT: \(text)")
+        //        print("TEXT: \(text)")
         
         if text != "" {
             if textField.tag == 1000 {
                 // Goal
-                dataModel.lists[promiseNum].goal = text
-            } else if textField.tag == 1004 {
+                dataModel.lists[dataModel.promiseNum].goal = text
+            } else if textField.tag == 10033 {
                 // Reward
-                dataModel.lists[promiseNum].reward = "\(text)"
+                dataModel.lists[dataModel.promiseNum].reward = text
             }
         }
-        
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        saveTextFieldData(textField: textField)
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        saveTextFieldData(textField: textField)
         return true
     }
     
     
-    func intervalViewController(_ controller: IntervalViewController, didFinishEditing interval: [Bool], days: String) {
-        dataModel.lists[promiseNum].interval = interval
-        intervalToDisplay = days
-        tableView.reloadData()
-        
-        reloadCell(cellName: "S0R1")
-    }
     
-    
-    func durationViewController(_ controller: DurationViewController, didFinishSelect duration: Int) {
-        dataModel.lists[promiseNum].duration = duration
-        tableView.reloadData()
-        
-        reloadCell(cellName: "S0R1")
-    }
-    
-    
-    func reloadCell(cellName: String) {
-        let indexPath = helper.indexPathForCellNamed(cellName)
-        let cell = helper.cellForRowAtIndexPath(indexPath!) as! DayTableRow
-        cell.promise = self.dataModel.lists[promiseNum]
-        cell.collectionView.reloadData()
-        tableView.reloadRows(at: [indexPath!], with: .automatic)
-    }
-    
-    
-    func checkInViewController(_ controller: CheckInViewController, didSelect emoji: String) {
-        
-        // remove blur background
-        blurView!.removeFromSuperview()
-        self.navigationController?.isNavigationBarHidden = false
-        
-        // add emoji
-        dataModel.lists[promiseNum].days[0].emojiName = emoji
-        let indexPath = helper.indexPathForCellNamed("S0R1")
-        let cell = helper.cellForRowAtIndexPath(indexPath!) as! DayTableRow
-        cell.collectionView.reloadData()
-        cell.curDay += 1
-        
-        // change button
-        buttonCheckIn.backgroundColor = UIColor.init(red: 0, green: 0, blue: 0, alpha: 0.7)
-        buttonCheckIn.layer.sublayers?[0].removeFromSuperlayer()
-        buttonCheckIn.setTitle("Done!", for: .normal)
-        buttonCheckIn.isEnabled = false
-
-
-        // button text animation (fade-in and out) // for animation reference
-//        let delay = 0.06
-//        UIView.animate(withDuration: delay, animations: { () -> Void in
-//            button.titleLabel?.alpha = 0.4
-//        }) { (Bool) -> Void in
-//            UIView.animate(withDuration: delay, delay: delay, options: .curveEaseInOut, animations: { () -> Void in
-//                button.titleLabel?.alpha = 1.0
-//            }, completion: nil)
-//        }
-    }
-    
-    func checkInViewControllerDidCancel(_ controller: CheckInViewController) {
-        
-        blurView?.removeFromSuperview()
-        self.navigationController?.isNavigationBarHidden = false
-        
-    }
     
     
     
@@ -656,97 +632,85 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     public func sharer(_ sharer: FBSDKSharing!, didCompleteWithResults results: [AnyHashable : Any]!) {
         if !results.isEmpty {
             print("successfully posted!")
-            //        print("ISEMPTY: \(results.isEmpty)")
-            //        print("POST ID: \(results.index(forKey: "postId")!)")
-            //        print("DESCRIPTION: \(results[AnyHashable("postId")]!)")
-            //        print("KEYFIRST: \(results.keys.first!)")
-            //        print("VALUEFIRST: \(results.values.first!)")
-            
-            
-            // data
-            dataModel.lists[promiseNum].isMade = true
-            
-            // if the user logged-in, download and show data
-            helper.showCell("S0R3")
-            helper.showCell("S0R4")
-            
-            let supporterYesIndexPath = helper.indexPathForCellNamed("S0R3")
-            let supporterYesCell = helper.cellForRowAtIndexPath(supporterYesIndexPath!) as! SupporterYesTableRow
-            supporterYesCell.promise = self.dataModel.lists[promiseNum]
-            
-            let supporterNoIndexPath = helper.indexPathForCellNamed("S0R4")
-            let supporterNoCell = helper.cellForRowAtIndexPath(supporterNoIndexPath!) as! SupporterNoTableRow
-            supporterNoCell.promise = self.dataModel.lists[promiseNum]
-            
-            updateUserData()
-            
-            
-            // UI
-            buttonShare.isHidden = true
-            
-            buttonCheckIn = UIButton()
-            buttonCheckIn.setTitle("Check-In", for: .normal)
-            if #available(iOS 8.2, *) {
-                buttonCheckIn.titleLabel?.font = UIFont.systemFont(ofSize: 22, weight: UIFontWeightRegular)
-            } else {
-                // Fallback on earlier versions
-            }
-            buttonCheckIn.setTitleColor(UIColor.white, for: .normal)
-            buttonCheckIn.setTitleColor(UIColor.init(red: 1, green: 1, blue: 1, alpha: 0.5), for: .highlighted)
-            buttonCheckIn.frame = CGRect(x: 0, y: self.view.frame.height - 70, width: self.view.frame.width, height: 70)
-            buttonCheckIn.backgroundColor = UIColor.yellow
-            buttonCheckIn.addTarget(self, action: #selector(self.checkIn), for: .touchUpInside)
-            self.view.addSubview(buttonCheckIn)
-            buttonCheckIn.applyGradient(colours: [UIColor.init(red: 255/255, green: 205/255, blue: 44/255, alpha: 1.0), UIColor.init(red: 255/255, green: 142/255, blue: 44/255, alpha: 1.0)])
-            
-            
-            handleCompletion(uid!, data)
             
             
         } else {
             print("post canceled")
             
             // data
-            dataModel.lists[promiseNum].isMade = true
+            let calendar = Calendar.current
+            let formatter = DateFormatter()
+            formatter.calendar = calendar
+            formatter.dateFormat = "yyyy-MM-dd"
+            let unitFlags = Set<Calendar.Component>([.day])
+            var duration = calendar.dateComponents(unitFlags, from: self.startDate, to: self.endDate)
+//            duration.day! += 1
+            print("START_DATE: \(self.startDate)")
+            print("END_DATE: \(self.endDate)")
+            print("WEEKDAY: \(duration.day!)")
             
-            // if the user logged-in, download and show data
-            helper.showCell("S0R3")
-            helper.showCell("S0R4")
-            
-            let competitorIndexPath = helper.indexPathForCellNamed("S0R2")
-            let competitorCell = helper.cellForRowAtIndexPath(competitorIndexPath!) as! CompetitorTableRow
-            competitorCell.promise = self.dataModel.lists[promiseNum]
-            
-            let supporterYesIndexPath = helper.indexPathForCellNamed("S0R3")
-            let supporterYesCell = helper.cellForRowAtIndexPath(supporterYesIndexPath!) as! SupporterYesTableRow
-            supporterYesCell.promise = self.dataModel.lists[promiseNum]
-
-            let supporterNoIndexPath = helper.indexPathForCellNamed("S0R4")
-            let supporterNoCell = helper.cellForRowAtIndexPath(supporterNoIndexPath!) as! SupporterNoTableRow
-            supporterNoCell.promise = self.dataModel.lists[promiseNum]
-            
-            updateUserData()
-            
-            
-            // UI
-            buttonShare.isHidden = true
-            
-            buttonCheckIn = UIButton()
-            buttonCheckIn.setTitle("Check-In", for: .normal)
-            if #available(iOS 8.2, *) {
-                buttonCheckIn.titleLabel?.font = UIFont.systemFont(ofSize: 22, weight: UIFontWeightRegular)
-            } else {
-                // Fallback on earlier versions
+            // for loop
+            let dataUrl = dataModel.lists[dataModel.promiseNum]
+            var startDateTemp = self.startDate
+            var datesToCheckIn = [DateToCheckIn]()
+            if let indices = duration.day {
+                for index in 0...indices {
+                    let day = calendar.component(.day, from: startDateTemp)
+//                  let month = calendar.component(.month, from: self.startDate)
+//                  let year = calendar.component(.year, from: self.startDate)
+                    let weekday = calendar.component(.weekday, from: startDateTemp)
+                    let weekOfYear = calendar.component(.weekOfYear, from: self.startDate)
+                    print("\(day), \(index), \(weekday), \(weekOfYear), \(dataUrl.interval[(weekday - 1) % 7])")
+                    let availability = dataUrl.interval[(weekday - 1) % 7]
+                    let formattedDate = formatter.string(from: startDateTemp)
+                    datesToCheckIn.append(DateToCheckIn(active: availability, count: index, formattedDate: formattedDate, day: day, weekday: weekday, weekOfYear: weekOfYear))
+                    dataUrl.datesToCheckIn = datesToCheckIn
+//                    dataUrl.datesToCheckIn.append(DateToCheckIn(active: availability, count: index, formattedDate: formattedDate, day: day, weekday: weekday, weekOfYear: weekOfYear))
+                    dataUrl.datesToCheckIn[index].count = index
+                    
+                    // add a day
+                    if let date = calendar.date(byAdding: .day, value: 1, to: startDateTemp) {
+                        startDateTemp = date
+                    }
+                }
             }
-            buttonCheckIn.setTitleColor(UIColor.white, for: .normal)
-            buttonCheckIn.setTitleColor(UIColor.init(red: 1, green: 1, blue: 1, alpha: 0.5), for: .highlighted)
-            buttonCheckIn.frame = CGRect(x: 0, y: self.view.frame.height - 70, width: self.view.frame.width, height: 70)
-            buttonCheckIn.backgroundColor = UIColor.yellow
-            buttonCheckIn.addTarget(self, action: #selector(self.checkIn), for: .touchUpInside)
-            self.view.addSubview(buttonCheckIn)
-            buttonCheckIn.applyGradient(colours: [UIColor.init(red: 255/255, green: 205/255, blue: 44/255, alpha: 1.0), UIColor.init(red: 255/255, green: 142/255, blue: 44/255, alpha: 1.0)])
+            
+//            var count = 0
+//            for test in dataUrl.datesToCheckIn {
+//                if test.active {
+//                    count += 1
+//                }
+//            }
+//            print("ACTIVE_DAYS: \(count)")
             
             
+            // data
+            dataModel.lists[dataModel.promiseNum].isMade = true
+            updateStartEndDates()
+            
+            // segue
+            performSegue(withIdentifier: "ShowCheckIn", sender: nil)
+            
+            
+//            
+//            // if the user logged-in, download and show data
+//            helper.showCell("S0R3")
+//            helper.showCell("S0R4")
+//            
+//            let competitorIndexPath = helper.indexPathForCellNamed("S0R2")
+//            let competitorCell = helper.cellForRowAtIndexPath(competitorIndexPath!) as! CompetitorTableRow
+//            competitorCell.promise = self.dataModel.lists[promiseNum]
+//            
+//            let supporterYesIndexPath = helper.indexPathForCellNamed("S0R3")
+//            let supporterYesCell = helper.cellForRowAtIndexPath(supporterYesIndexPath!) as! SupporterYesTableRow
+//            supporterYesCell.promise = self.dataModel.lists[promiseNum]
+//
+//            let supporterNoIndexPath = helper.indexPathForCellNamed("S0R4")
+//            let supporterNoCell = helper.cellForRowAtIndexPath(supporterNoIndexPath!) as! SupporterNoTableRow
+//            supporterNoCell.promise = self.dataModel.lists[promiseNum]
+//            
+////            updateUserData()
+//            
             handleCompletion(uid!, data)
             
         }
@@ -761,47 +725,42 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
     }
     
     
-    func checkIn() {
-        performSegue(withIdentifier: "ShowCheckIn", sender: nil)
-    }
-    
-    
-    func backgroundBlur() {
-        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.extraLight)
-        blurView = UIVisualEffectView(effect: blurEffect)
-        blurView?.frame = view.bounds
-        blurView?.autoresizingMask = [.flexibleWidth, .flexibleHeight] // for supporting device rotation
-        view.addSubview(blurView!)
-    }
-    
-    
+//    func checkIn() {
+//        performSegue(withIdentifier: "ShowCheckIn", sender: nil)
+//    }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowInterval" {
-            //            print("SHOWINTERVAL")
-            let controller = segue.destination as! IntervalViewController
+//            print("SHOWINTERVAL")
+            let navigationController = segue.destination as! UINavigationController
+            let controller = navigationController.topViewController as! IntervalViewController
             controller.delegate = self
-            controller.intervals = dataModel.lists[promiseNum].interval
-            controller.intervalToDisplay = self.intervalToDisplay
-            
-        } else if segue.identifier == "ShowDuration" {
-            //            print("SHOWDURATION")
-            let controller = segue.destination as! DurationViewController
-            controller.delegate = self
-            controller.selectedWeeks = dataModel.lists[promiseNum].duration
+            controller.intervals = dataModel.lists[dataModel.promiseNum].interval
+//            controller.intervalToDisplay = self.intervalToDisplay
             
         } else if segue.identifier == "ShowCheckIn" {
 //            print("SHOWCHECKIN")
-            backgroundBlur()
             let controller = segue.destination as! CheckInViewController
-            controller.delegate = self
-            
-            // hid nav bar
-            self.navigationController?.isNavigationBarHidden = true
+//            controller.promiseNum = self.promiseNum
+            controller.dataModel = self.dataModel
+//            controller.uid = self.uid
+            controller.comm = self.comm
+//            controller.intervalToDisplay = self.intervalToDisplay
+//            controller.durationToDisplay = self.durationToDisplay
+//            controller.startDate = self.startDate
         }
     }
     
     
+//    func reloadCell(cellName: String) {
+//        let indexPath = helper.indexPathForCellNamed(cellName)
+////        let cell = helper.cellForRowAtIndexPath(indexPath!) as! DayTableRow
+//        cell.promise = self.dataModel.lists[promiseNum]
+//        cell.collectionView.reloadData()
+//        tableView.reloadRows(at: [indexPath!], with: .automatic)
+//    }
+    
+    
 }
 
 
@@ -810,21 +769,35 @@ class PromiseViewController: UIViewController, UITableViewDataSource,UITableView
 
 
 
-extension UIView {
-    func applyGradient(colours: [UIColor]) -> Void {
-        self.applyGradient(colours: colours, locations: nil)
+extension PromiseViewController: IntervalViewControllerDelegate {
+    
+    func intervalViewController(_ controller: IntervalViewController, didFinishEditing interval: [Bool]) {
+        
+        dataModel.lists[dataModel.promiseNum].interval = interval
+        self.intervalToDisplay = dataModel.lists[dataModel.promiseNum].getIntervalToDisplay()
     }
     
-    func applyGradient(colours: [UIColor], locations: [NSNumber]?) -> Void {
-        let gradient: CAGradientLayer = CAGradientLayer()
-        gradient.frame = self.bounds
-        gradient.colors = colours.map { $0.cgColor }
-        gradient.locations = locations
-        gradient.startPoint = CGPoint(x: 0.0, y: 1.0)
-        gradient.endPoint = CGPoint(x: 1.0, y: 1.0)
-        self.layer.insertSublayer(gradient, at: 0)
-    }
+    
+//    func durationViewController(_ controller: DurationViewController, didFinishSelect duration: Int, durationToDisplay: String) {
+//        
+//        dataModel.lists[dataModel.promiseNum].duration = duration
+//        self.durationToDisplay = dataModel.lists[dataModel.promiseNum].durationToDisplay()
+////        let durationSuffix = (duration == 1) ? "" : "s"
+////        self.durationToDisplay = "\(duration) Week\(durationSuffix)"
+//        
+//    }
+
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

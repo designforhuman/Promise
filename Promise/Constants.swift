@@ -14,21 +14,31 @@
 //  limitations under the License.
 //
 
+
+import UIKit
+
+
 struct Constants {
 
-  struct NotificationKeys {
-    static let SignedIn = "onSignInCompleted"
-  }
+    struct NotificationKeys {
+        static let SignedIn = "onSignInCompleted"
+    }
 
-  struct Segues {
-    static let SignInToFp = "SignInToFP"
-    static let FpToSignIn = "FPToSignIn"
-  }
+    struct Segues {
+        static let SignInToFp = "SignInToFP"
+        static let FpToSignIn = "FPToSignIn"
+    }
 
-  struct MessageFields {
-    static let name = "name"
-    static let text = "text"
-    static let photoURL = "photoURL"
-    static let imageURL = "imageURL"
-  }
+    struct MessageFields {
+        static let name = "name"
+        static let text = "text"
+        static let photoURL = "photoURL"
+        static let imageURL = "imageURL"
+    }
+    
+    struct Colors {
+        static let mainColor = UIColor(red: 242/255, green: 53/255, blue: 77/255, alpha: 1.0)
+        static let disabledColor = UIColor(red: 209/255, green: 212/255, blue: 218/255, alpha: 1.0)
+    }
+    
 }

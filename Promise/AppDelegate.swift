@@ -36,44 +36,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication, didFinishLaunchingWithOptions
         launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         
-        // firebase
-        FIRApp.configure()
-        
-        // facebook auth
-        FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
-        
         // datamodel
         let controller = window!.rootViewController as! SignInViewController
         controller.dataModel = dataModel
 //        print("CONTROLLER-: \(controller.dataModel)")
         
-        // notification
-        if #available(iOS 10.0, *) {
-            let center = UNUserNotificationCenter.current()
-            center.delegate = self
-            
-//            center.requestAuthorization(options: [.alert, .sound, .badge]) {
-//                granted, error in
-//                if granted {
-//                    print("We have permission")
-//                } else {
-//                    print("Permission denied")
-//                }
-//            }
-            
-//            let content = UNMutableNotificationContent()
-//            content.title = "Hello!"
-//            content.body = "I am a local notification"
-//            content.sound = UNNotificationSound.default()
-//            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
-//            let request = UNNotificationRequest(identifier: "MyNotification", content: content, trigger: trigger)
-//            center.add(request)
-            
-        } else {
-            // Fallback on earlier versions
-            
-        }
+        // facebook auth
+        FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
         
+        // firebase
+        FIRApp.configure()
+        
+        // notification
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
         
         return true
     }
@@ -116,11 +92,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     
-    @available(iOS 10.0, *)
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                willPresent notification: UNNotification,
-                                withCompletionHandler completionHandler:
-        @escaping (UNNotificationPresentationOptions) -> Void) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        // this is called when the app is running as the notification is triggered
+        
         print("Received local notification \(notification)")
     }
     
