@@ -7,20 +7,20 @@
 //
 
 import UIKit
-import FBSDKShareKit
 import Firebase
+import FBSDKShareKit
 import UserNotifications
 
 
 class PromiseViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate, FBSDKSharingDelegate {
     
-//    let promiseNum: Int!
+    var dataModel: DataModel!
     
     var comm: FCViewController!
-    let uid = AppState.sharedInstance.uid //"JWEFfYj52fVT4uCH3MUk6jgnSsK2"
+    let uid = AppState.sharedInstance.uid
     
     var helper: TableViewHelper!
-    var dataModel: DataModel!
+    
     var intervalToDisplay = "Everyday"
     var durationToDisplay = "4 Weeks"
     let goalLength: NSNumber = 13
@@ -133,7 +133,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
         let optionMenu = UIAlertController(title: "Share to Confirm", message: "Be sure to share your Promise to others to get motivated!", preferredStyle: .actionSheet)
         
         updateData()
-        let content = prepareContent(uid: uid!)
+        let content = prepareContent()
         
         let deleteAction = UIAlertAction(title: "Facebook", style: .default, handler: {
             (alert: UIAlertAction!) -> Void in
@@ -142,7 +142,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
 //            shareDialog.fromViewController = self
             shareDialog.shareContent = content
             shareDialog.delegate = self
-            shareDialog.mode = FBSDKShareDialogMode.browser
+//            shareDialog.mode = FBSDKShareDialogMode.browser
             shareDialog.show()
         })
         
@@ -188,8 +188,8 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
         disableButtonShare()
         
         // set initial data
-        print("DATAMODEL2: \(dataModel)")
-        print("LISTS2: \(dataModel.lists)")
+//        print("DATAMODEL2: \(dataModel)")
+//        print("LISTS2: \(dataModel.lists)")
         setInitialDates()
         
 //        print("PROMISENUM1: \(self.dataModel.lists.count)")
@@ -375,14 +375,18 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
             reminderSwitch = cell.viewWithTag(10055) as! UISwitch
             if dataModel.lists[dataModel.promiseNum].shouldRemind {
                 self.reminderSwitch.setOn(true, animated: false)
-                let formatter = DateFormatter()
-                formatter.dateStyle = .none
-                formatter.timeStyle = .short
-                reminderLabel?.text = "Reminder \(formatter.string(from: dataModel.lists[dataModel.promiseNum].remindDate))"
+                showReminderTime()
             }
         }
 
         return helper.cellForRowAtIndexPath(indexPath)
+    }
+    
+    func showReminderTime() {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        reminderLabel?.text = "Reminder \(formatter.string(from: dataModel.lists[dataModel.promiseNum].remindDate))"
     }
     
     
@@ -475,44 +479,20 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
     func updateData() {
         data = ["goal": dataModel.lists[dataModel.promiseNum].goal,
                 "interval": intervalToDisplay,
-                "duration": durationToDisplay,
                 "reward": dataModel.lists[dataModel.promiseNum].reward]
     }
     
-    func prepareContent(uid: String) -> FBSDKShareLinkContent {
+    func prepareContent() -> FBSDKShareLinkContent {
         
         let content = FBSDKShareLinkContent()
         let urlPrefix = "https://promise-1432d.firebaseapp.com/?promiseId="
-        content.contentTitle = "I promise to \(dataModel.lists[dataModel.promiseNum].goal). \(intervalToDisplay) for \(durationToDisplay.lowercased()). Do you think I can make it?"
+        let goal = dataModel.lists[dataModel.promiseNum].goal
+        content.contentTitle = "I promise to \(goal.lowercased()), \(intervalToDisplay.lowercased()) until \(endDateString). Do you think I can make it?"
         content.contentDescription = "\(dataModel.lists[dataModel.promiseNum].rewardPrefix) \(dataModel.lists[dataModel.promiseNum].reward)"
-        content.contentURL = URL(string: urlPrefix + uid)
-        content.imageURL = URL(string: "https://promise-1432d.firebaseapp.com/static/images/defaultShare@2x.jpg")
+        content.contentURL = URL(string: urlPrefix + self.uid!)
+        content.imageURL = URL(string: "https://promise-1432d.firebaseapp.com/static/images/defaultShareImage@2x.jpg")
         
         return content
-    }
-    
-    
-    func handleCompletion(_ uid: String, _ data: Dictionary<String, String>) {
-        // Write Data
-        comm.ref.child("users/\(uid)").observeSingleEvent(of: .value, with: { (snapshot) in
-            let hasChild = snapshot.hasChild("promise1")
-            // print("HASCHILD: \(value)")
-            if hasChild {
-//                print("UPDATE PROMISE")
-//                print("UID--: \(self.uid!)")
-//                print("COMM--: \(self.comm!)")
-                self.comm.ref.child("users/\(uid)/promise\(self.dataModel.lists.count)").updateChildValues(data)
-            } else {
-                print("NEW PROMISE")
-                self.dataModel.lists.append(self.dataModel.lists[self.dataModel.promiseNum])
-                print("LISTS: \(self.dataModel.lists)")
-                self.comm.ref.child("users/\(uid)/promise\(self.dataModel.lists.count)").setValue(data)
-            }
-        }) { (error) in
-            print(error.localizedDescription)
-        }
-        // scroll to top
-        self.tableView.contentOffset = CGPoint(x: 0, y: 0 - self.tableView.contentInset.top)
     }
     
     
@@ -692,7 +672,6 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
             performSegue(withIdentifier: "ShowCheckIn", sender: nil)
             
             
-//            
 //            // if the user logged-in, download and show data
 //            helper.showCell("S0R3")
 //            helper.showCell("S0R4")
@@ -711,23 +690,58 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
 //            
 ////            updateUserData()
 //            
-            handleCompletion(uid!, data)
+            handleCompletion(data)
             
         }
     }
+    
+    
+    func handleCompletion(_ data: Dictionary<String, String>) {
+        // Write Data
+        let uid = self.uid!
+        comm.ref.child("users/\(uid)").observeSingleEvent(of: .value, with: { (snapshot) in
+            let hasChild = snapshot.hasChild("promise\(self.dataModel.promiseNum)")
+            // print("HASCHILD: \(value)")
+            if hasChild {
+//                print("UPDATE PROMISE")
+//                print("UID--: \(self.uid!)")
+//                print("COMM--: \(self.comm!)")
+                self.comm.ref.child("users/\(uid)/promise\(self.dataModel.promiseNum)").updateChildValues(data)
+                
+                // register self as a competitor
+                let userSelfData = ["name": "You",
+                                    "photoURL": "\(AppState.sharedInstance.photoURL!)"]
+                self.comm.ref.child("users/\(uid)/promise\(self.dataModel.promiseNum)/competitors/\(uid)").setValue(userSelfData)
+                
+            } else {
+                print("NEW PROMISE")
+                self.dataModel.lists.append(self.dataModel.lists[self.dataModel.promiseNum])
+                self.comm.ref.child("users/\(uid)/promise\(self.dataModel.promiseNum)").setValue(data)
+                
+                // register self as a competitor
+                let userSelfData = ["name": "You",
+                                    "photoURL": "\(AppState.sharedInstance.photoURL!)"]
+                self.comm.ref.child("users/\(uid)/promise\(self.dataModel.promiseNum)/competitors/\(uid)").setValue(userSelfData)
+            }
+        }) { (error) in
+            print(error.localizedDescription)
+        }
+        // scroll to top
+        self.tableView.contentOffset = CGPoint(x: 0, y: 0 - self.tableView.contentInset.top)
+    }
+    
     
     func sharer(_ sharer: FBSDKSharing!, didFailWithError error: Error!) {
         print(error.localizedDescription)
     }
     
+    
     func sharerDidCancel(_ sharer: FBSDKSharing!) {
-//        print("share canceled!")
+        print("share canceled!")
     }
     
+
     
-//    func checkIn() {
-//        performSegue(withIdentifier: "ShowCheckIn", sender: nil)
-//    }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowInterval" {

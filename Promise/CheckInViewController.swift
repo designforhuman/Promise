@@ -62,6 +62,14 @@ class CheckInViewController: UIViewController {
             print("Congrats!!!")
             performSegue(withIdentifier: "ShowCompletion", sender: nil)
         }
+        
+        // show alert // temp.
+        let alert = UIAlertController(title: "Awesome!",
+                                      message: "You've finished \(calcCheckedInDays()) of \(calcCheckInDaysTotal()).",
+                                      preferredStyle: .alert)
+        let action = UIAlertAction(title: "Got It", style: .default, handler: nil)
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
     }
     
     
@@ -189,7 +197,7 @@ class CheckInViewController: UIViewController {
         let supporterNoCell = self.helper.cellForRowAtIndexPath(supporterNoIndexPath!) as! SupporterNoTableRow
         
         // Competitors
-        comm.ref.child("users/\(uid!)/promise1/competitors").observeSingleEvent(of: .value, with: { (snapshot) in
+        comm.ref.child("users/\(uid!)/promise\(dataModel.promiseNum)/competitors").observeSingleEvent(of: .value, with: { (snapshot) in
             // Get user value
             var competitors = [NSDictionary]()
 //            print("SNAPSHOT: \(snapshot)")
@@ -204,7 +212,7 @@ class CheckInViewController: UIViewController {
             for dict in competitors {
                 var competitor = dict as! [String: String]
                 let userName = competitor["name"]!
-                let userPhoto = competitor["photoUrl"]!
+                let userPhoto = competitor["photoURL"]!
                 competitorCell.competitorNames.append(userName)
                 competitorCell.competitorPhotoUrls.append(userPhoto)
                 
@@ -219,7 +227,7 @@ class CheckInViewController: UIViewController {
         
         
         // Supporters
-        comm.ref.child("users/\(uid!)/promise1/users").observeSingleEvent(of: .value, with: { (snapshot) in
+        comm.ref.child("users/\(uid!)/promise\(dataModel.promiseNum)/users").observeSingleEvent(of: .value, with: { (snapshot) in
             // Get user value
 //            let value = snapshot.value as? NSDictionary
             var supporters = [NSDictionary]()
@@ -314,19 +322,28 @@ class CheckInViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    
+    func calcCheckInDaysTotal() -> Int {
+        return dataModel.lists[dataModel.promiseNum].datesToCheckIn.count
+    }
+    
+    func calcCheckedInDays() -> Int {
+        var checkedInDays = 0
+        for day in dataModel.lists[dataModel.promiseNum].datesToCheckIn {
+            if day.isCheckedIn {
+                checkedInDays += 1
+            }
+        }
+        return checkedInDays
+    }
+    
 
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowCompletion" {
             let controller = segue.destination as! CompletionViewController
-            controller.totalDays = dataModel.lists[dataModel.promiseNum].datesToCheckIn.count
-            var checkedInDays = 0
-            for day in dataModel.lists[dataModel.promiseNum].datesToCheckIn {
-                if day.isCheckedIn {
-                    checkedInDays += 1
-                }
-            }
-            controller.checkedInDays = checkedInDays
+            controller.totalDays = calcCheckInDaysTotal()
+            controller.checkedInDays = calcCheckedInDays()
         }
     }
  
@@ -382,21 +399,25 @@ extension CheckInViewController: UITableViewDataSource {
         if cellName == "S0R5" {
             reminderLabel = cell.viewWithTag(1005) as! UILabel
             if reminderLabel?.text != "Reminder" {
-                updateReminder()
+                showReminderTime()
             }
             
             reminderSwitch = cell.viewWithTag(10055) as! UISwitch
             if dataModel.lists[dataModel.promiseNum].shouldRemind {
                 reminderSwitch.setOn(true, animated: false)
-                let formatter = DateFormatter()
-                formatter.dateStyle = .none
-                formatter.timeStyle = .short
-                reminderLabel?.text = "Reminder \(formatter.string(from: dataModel.lists[dataModel.promiseNum].remindDate))"
+                showReminderTime()
             }
         }
         
         return helper.cellForRowAtIndexPath(indexPath)
         
+    }
+    
+    func showReminderTime() {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        reminderLabel?.text = "Reminder \(formatter.string(from: dataModel.lists[dataModel.promiseNum].remindDate))"
     }
     
 }

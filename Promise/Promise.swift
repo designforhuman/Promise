@@ -119,14 +119,14 @@ class Promise: NSObject, NSCoding {
         removeNotification()
         
         let content = UNMutableNotificationContent()
-        content.title = "Are you ready to do \(goal)?"
+        content.title = "Are you ready to do \(goal.lowercased())?"
         content.body = "Let's do it!"
         content.sound = UNNotificationSound.default()
         
         let calendar = Calendar(identifier: .gregorian)
         let components = calendar.dateComponents([.hour, .minute], from: remindDate)
         
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         let request = UNNotificationRequest(identifier: "\(itemID)", content: content, trigger: trigger)
         
         let center = UNUserNotificationCenter.current()

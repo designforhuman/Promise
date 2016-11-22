@@ -18,7 +18,7 @@ class DataModel {
     init() {
         loadLists()
         registerDefaults()
-        handleFirstTime()
+//        handleFirstTime()
 //        print("DIRECTORYYYY: \(documentsDirectory())")
     }
     

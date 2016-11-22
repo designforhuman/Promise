@@ -48,19 +48,26 @@ class SignInViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(false)
+        
         if let user = FIRAuth.auth()?.currentUser {
-            print("DATAMDEL: \(dataModel)")
-            print("LISTS: \(dataModel.lists)")
             
-            self.signedIn(user) // temp
+            // make a list if there isn't any.
+            if dataModel.lists.count == 0 {
+                let promise = Promise()
+                self.dataModel.lists.append(promise)
+            }
+//            print("DATAMDEL: \(dataModel)")
+//            print("LISTS: \(dataModel.lists)")
             
-//            if dataModel.lists[dataModel.promiseNum].isMade {
-//                print("SIGNEDIN------1")
-//                self.promiseMade(user)
-//            } else {
-//                print("SIGNEDIN------2")
-//                self.signedIn(user)
-//            }
+//            self.signedIn(user) // temp
+            
+            if dataModel.lists[dataModel.promiseNum].isMade {
+                print("SIGNEDIN------1")
+                self.promiseMade(user)
+            } else {
+                print("SIGNEDIN------2")
+                self.signedIn(user)
+            }
         }
     }
     
@@ -124,9 +131,6 @@ class SignInViewController: UIViewController {
                     if let user = user {
                         print("SIGNEDIN------0")
                         self.signedIn(user)
-                        let uid = user.uid
-                        self.comm.configureDatabase()
-                        self.comm.ref.child("users").child(uid).child("info").setValue(["userPhoto": "\(user.photoURL!)"])
                     } else {
                         
                     }
@@ -182,9 +186,15 @@ class SignInViewController: UIViewController {
         AppState.sharedInstance.displayName = user?.displayName ?? user?.email
         AppState.sharedInstance.photoURL = user?.photoURL
         AppState.sharedInstance.signedIn = true
+        
+        self.comm.configureDatabase()
+        let userSelfData = ["name": AppState.sharedInstance.displayName!,
+                            "photoURL": "\(AppState.sharedInstance.photoURL!)"]
+        self.comm.ref.child("users/\(AppState.sharedInstance.uid!)/info").setValue(userSelfData)
+        
         let notificationName = Notification.Name(rawValue: Constants.NotificationKeys.SignedIn)
         NotificationCenter.default.post(name: notificationName, object: nil, userInfo: nil)
-        //    performSegue(withIdentifier: Constants.Segues.SignInToFp, sender: nil)
+        
         performSegue(withIdentifier: "ShowPromise", sender: nil)
     }
     
