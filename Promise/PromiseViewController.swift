@@ -23,7 +23,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
     
     var intervalToDisplay = "Everyday"
     var durationToDisplay = "4 Weeks"
-    let goalLength: NSNumber = 13
+    let goalLength: NSNumber = 15
     let minGoalTextLength = 2
     var data = [String: String]()
     var textFieldGoal: UITextField?
@@ -191,6 +191,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
 //        print("DATAMODEL2: \(dataModel)")
 //        print("LISTS2: \(dataModel.lists)")
         setInitialDates()
+        dataModel.lists[dataModel.promiseNum].rewardPrefix = "If I fail, I will"
         
 //        print("PROMISENUM1: \(self.dataModel.lists.count)")
         
@@ -613,10 +614,6 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
         if !results.isEmpty {
             print("successfully posted!")
             
-            
-        } else {
-            print("post canceled")
-            
             // data
             let calendar = Calendar.current
             let formatter = DateFormatter()
@@ -624,7 +621,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
             formatter.dateFormat = "yyyy-MM-dd"
             let unitFlags = Set<Calendar.Component>([.day])
             var duration = calendar.dateComponents(unitFlags, from: self.startDate, to: self.endDate)
-//            duration.day! += 1
+            //            duration.day! += 1
             print("START_DATE: \(self.startDate)")
             print("END_DATE: \(self.endDate)")
             print("WEEKDAY: \(duration.day!)")
@@ -636,8 +633,8 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
             if let indices = duration.day {
                 for index in 0...indices {
                     let day = calendar.component(.day, from: startDateTemp)
-//                  let month = calendar.component(.month, from: self.startDate)
-//                  let year = calendar.component(.year, from: self.startDate)
+                    //                  let month = calendar.component(.month, from: self.startDate)
+                    //                  let year = calendar.component(.year, from: self.startDate)
                     let weekday = calendar.component(.weekday, from: startDateTemp)
                     let weekOfYear = calendar.component(.weekOfYear, from: self.startDate)
                     print("\(day), \(index), \(weekday), \(weekOfYear), \(dataUrl.interval[(weekday - 1) % 7])")
@@ -645,7 +642,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
                     let formattedDate = formatter.string(from: startDateTemp)
                     datesToCheckIn.append(DateToCheckIn(active: availability, count: index, formattedDate: formattedDate, day: day, weekday: weekday, weekOfYear: weekOfYear))
                     dataUrl.datesToCheckIn = datesToCheckIn
-//                    dataUrl.datesToCheckIn.append(DateToCheckIn(active: availability, count: index, formattedDate: formattedDate, day: day, weekday: weekday, weekOfYear: weekOfYear))
+                    //                    dataUrl.datesToCheckIn.append(DateToCheckIn(active: availability, count: index, formattedDate: formattedDate, day: day, weekday: weekday, weekOfYear: weekOfYear))
                     dataUrl.datesToCheckIn[index].count = index
                     
                     // add a day
@@ -655,13 +652,13 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
                 }
             }
             
-//            var count = 0
-//            for test in dataUrl.datesToCheckIn {
-//                if test.active {
-//                    count += 1
-//                }
-//            }
-//            print("ACTIVE_DAYS: \(count)")
+            //            var count = 0
+            //            for test in dataUrl.datesToCheckIn {
+            //                if test.active {
+            //                    count += 1
+            //                }
+            //            }
+            //            print("ACTIVE_DAYS: \(count)")
             
             
             // data
@@ -672,25 +669,29 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
             performSegue(withIdentifier: "ShowCheckIn", sender: nil)
             
             
-//            // if the user logged-in, download and show data
-//            helper.showCell("S0R3")
-//            helper.showCell("S0R4")
-//            
-//            let competitorIndexPath = helper.indexPathForCellNamed("S0R2")
-//            let competitorCell = helper.cellForRowAtIndexPath(competitorIndexPath!) as! CompetitorTableRow
-//            competitorCell.promise = self.dataModel.lists[promiseNum]
-//            
-//            let supporterYesIndexPath = helper.indexPathForCellNamed("S0R3")
-//            let supporterYesCell = helper.cellForRowAtIndexPath(supporterYesIndexPath!) as! SupporterYesTableRow
-//            supporterYesCell.promise = self.dataModel.lists[promiseNum]
-//
-//            let supporterNoIndexPath = helper.indexPathForCellNamed("S0R4")
-//            let supporterNoCell = helper.cellForRowAtIndexPath(supporterNoIndexPath!) as! SupporterNoTableRow
-//            supporterNoCell.promise = self.dataModel.lists[promiseNum]
-//            
-////            updateUserData()
-//            
+            //            // if the user logged-in, download and show data
+            //            helper.showCell("S0R3")
+            //            helper.showCell("S0R4")
+            //
+            //            let competitorIndexPath = helper.indexPathForCellNamed("S0R2")
+            //            let competitorCell = helper.cellForRowAtIndexPath(competitorIndexPath!) as! CompetitorTableRow
+            //            competitorCell.promise = self.dataModel.lists[promiseNum]
+            //
+            //            let supporterYesIndexPath = helper.indexPathForCellNamed("S0R3")
+            //            let supporterYesCell = helper.cellForRowAtIndexPath(supporterYesIndexPath!) as! SupporterYesTableRow
+            //            supporterYesCell.promise = self.dataModel.lists[promiseNum]
+            //
+            //            let supporterNoIndexPath = helper.indexPathForCellNamed("S0R4")
+            //            let supporterNoCell = helper.cellForRowAtIndexPath(supporterNoIndexPath!) as! SupporterNoTableRow
+            //            supporterNoCell.promise = self.dataModel.lists[promiseNum]
+            //            
+            ////            updateUserData()
+            //            
             handleCompletion(data)
+            
+            
+        } else {
+            print("post canceled")
             
         }
     }
@@ -703,7 +704,7 @@ class PromiseViewController: UIViewController, UITableViewDataSource, UITableVie
             let hasChild = snapshot.hasChild("promise\(self.dataModel.promiseNum)")
             // print("HASCHILD: \(value)")
             if hasChild {
-//                print("UPDATE PROMISE")
+                print("UPDATE PROMISE")
 //                print("UID--: \(self.uid!)")
 //                print("COMM--: \(self.comm!)")
                 self.comm.ref.child("users/\(uid)/promise\(self.dataModel.promiseNum)").updateChildValues(data)
